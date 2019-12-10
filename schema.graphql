@@ -5,8 +5,6 @@ type OptionsFactory @entity {
 
   owner: Bytes!
 
-  displayName: String!
-
   actions: [FactoryAction!] @derivedFrom(field: "factory")
 }
 
@@ -134,4 +132,15 @@ type FactoryOwnershipTransferred implements FactoryAction @entity {
 
   " Action timestamp as seconds (time) "
   timestamp: BigInt!
+}
+
+type SupportedAsset @entity {
+  " Equals to: Asset Name "
+  id: ID!
+
+  " Asset name"
+  asset: String!
+
+  " Asset Address "
+  address: Bytes!
 }
