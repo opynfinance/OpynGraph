@@ -77,8 +77,11 @@ type AssetChanged implements FactoryAction @entity {
   " Asset name "
   asset: String!
 
-  " Asset address "
-  address: Bytes!
+  " Previous Asset address "
+  oldAddress: Bytes!
+
+  " New Asset address "
+  newAddress: Bytes!
 
   " Block number "
   block: BigInt!
@@ -122,7 +125,7 @@ type FactoryOwnershipTransferred implements FactoryAction @entity {
   oldOwner: Bytes!
 
   " New owner number "
-  newOwner: BigInt!
+  newOwner: Bytes!
 
   " Block number "
   block: BigInt!

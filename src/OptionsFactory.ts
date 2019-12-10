@@ -1,11 +1,14 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigInt, log, store } from '@graphprotocol/graph-ts'
 
 import { OptionsFactory, OptionsContractCreated, AssetAdded, AssetChanged, AssetDeleted, OwnershipTransferred } from '../generated/OptionsFactory/OptionsFactory'
 
 import {
   OptionsFactory as OptionsFactoryState,
   SupportedAsset,
-  AssetAdded as AssetAddedState
+  AssetAdded as AssetAddedState,
+  AssetChanged as AssetChangedState,
+  AssetDeleted as AssetDeletedState,
+  FactoryOwnershipTransferred
 } from '../generated/schema'
 
 import { BIGINT_ZERO } from './helpers'
@@ -48,8 +51,65 @@ export function handleAssetAdded(event: AssetAdded): void {
   action.save()
 }
 
-export function handleAssetChanged(event: AssetChanged): void {}
+export function handleAssetChanged(event: AssetChanged): void {
+  getOptionsFactory(event.address)
 
-export function handleAssetDeleted(event: AssetDeleted): void {}
+  let asset = SupportedAsset.load(event.params.asset.toHexString())
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {}
+  if (asset !== null) {
+    let oldAddress = asset.address
+    asset.address = event.params.addr
+    asset.save()
+
+    let actionId = 'ASSET-CHANGED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let action = new AssetChangedState(actionId)
+    action.factory = OPTION_CONTRACT_STATE_KEY
+    action.asset = event.params.asset.toHexString()
+    action.oldAddress = oldAddress
+    action.newAddress = event.params.addr
+    action.block = event.block.number
+    action.transactionHash = event.transaction.hash
+    action.timestamp = event.block.timestamp
+    action.save()
+  } else {
+    log.warning('handleAssetChanged: No Asset with id {} found.', [event.params.asset.toHexString()])
+  }
+}
+
+export function handleAssetDeleted(event: AssetDeleted): void {
+  getOptionsFactory(event.address)
+
+  let asset = SupportedAsset.load(event.params.asset.toHexString())
+
+  if (asset !== null) {
+    store.remove('SupportedAsset', event.params.asset.toHexString())
+
+    let actionId = 'ASSET-DELETED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let action = new AssetDeletedState(actionId)
+    action.factory = OPTION_CONTRACT_STATE_KEY
+    action.asset = event.params.asset.toHexString()
+    action.address = asset.address
+    action.block = event.block.number
+    action.transactionHash = event.transaction.hash
+    action.timestamp = event.block.timestamp
+    action.save()
+  } else {
+    log.warning('handleAssetChanged: No Asset with id {} found.', [event.params.asset.toHexString()])
+  }
+}
+
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {
+  let optionFactory = getOptionsFactory(event.address)
+  optionFactory.owner = event.params.newOwner
+  optionFactory.save()
+
+  let actionId = 'OWNERSHIP-TRANFERRED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let action = new FactoryOwnershipTransferred(actionId)
+  action.factory = OPTION_CONTRACT_STATE_KEY
+  action.oldOwner = event.params.previousOwner
+  action.newOwner = event.params.newOwner
+  action.block = event.block.number
+  action.transactionHash = event.transaction.hash
+  action.timestamp = event.block.timestamp
+  action.save()
+}
