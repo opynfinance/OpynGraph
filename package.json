@@ -1,18 +1,17 @@
 {
-  "name": "options-insurance",
+  "name": "opyn-options-protocol",
   "version": "0.1.0",
   "scripts": {
-    "build-contract": "solc contracts/Gravity.sol --abi -o abis --overwrite && solc contracts/Gravity.sol --bin -o bin --overwrite",
-    "create": "graph create lmcorbalan/options-insurance --node https://api.thegraph.com/deploy/",
-    "create-local": "graph create lmcorbalan/options-insurance --node http://127.0.0.1:8020",
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy lmcorbalan/options-insurance --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "deploy-local": "graph deploy lmcorbalan/options-insurance --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
+    "deploy": "graph deploy lmcorbalan/lisandro-staging --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.16.0",
-    "@graphprotocol/graph-ts": "^0.16.0"
+    "@graphprotocol/graph-ts": "^0.16.0",
+    "husky": "^3.1.0",
+    "lint-staged": "^9.5.0",
+    "prettier": "^1.19.1"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",

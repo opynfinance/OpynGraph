@@ -1,6 +1,137 @@
-type Gravatar @entity {
+type OptionsFactory @entity {
   id: ID!
+
+  optionsExchangeAddress: Bytes!
+
   owner: Bytes!
+
   displayName: String!
-  imageUrl: String!
+
+  actions: [FactoryAction!] @derivedFrom(field: "factory")
+}
+
+#
+# Factory Action
+#
+interface FactoryAction {
+  " Equals to: <actionType>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  factory: OptionsFactory
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type OptionsContractCreated implements FactoryAction @entity {
+  " Equals to: <OPTIONS-CREATED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  factory: OptionsFactory
+
+  " OptionsContract address "
+  address: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type AssetAdded implements FactoryAction @entity {
+  " Equals to: <ASSET-ADDED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  factory: OptionsFactory
+
+  " Asset name "
+  asset: String!
+
+  " Asset address "
+  address: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type AssetChanged implements FactoryAction @entity {
+  " Equals to: <ASSET-CHANGED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  factory: OptionsFactory
+
+  " Asset name "
+  asset: String!
+
+  " Asset address "
+  address: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type AssetDeleted implements FactoryAction @entity {
+  " Equals to: <ASSET-DELETED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  factory: OptionsFactory
+
+  " Asset name "
+  asset: String!
+
+  " Asset address "
+  address: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type FactoryOwnershipTransferred implements FactoryAction @entity {
+  " Equals to: <OWNERSHIP-TRANFERRED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  factory: OptionsFactory
+
+  " Previous owner address "
+  oldOwner: Bytes!
+
+  " New owner number "
+  newOwner: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
 }
