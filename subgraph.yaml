@@ -1,6 +1,6 @@
 specVersion: 0.0.2
 description: Test Subgraph
-repository: https://https://github.com/lmcorbalan/test-subgraph
+repository: https://https://github.com/aparnakr/OpynGraph
 schema:
   file: ./schema.graphql
 dataSources:
@@ -21,6 +21,8 @@ dataSources:
       abis:
         - name: OptionsFactory
           file: ./abis/OptionsFactory.json
+        - name: OptionsContract
+          file: ./abis/OptionsContract.json
       eventHandlers:
         - event: OptionsContractCreated(address)
           handler: handleOptionsContractCreated
@@ -32,3 +34,40 @@ dataSources:
           handler: handleAssetDeleted
         - event: OwnershipTransferred(indexed address,indexed address)
           handler: handleOwnershipTransferred
+templates:
+  - name: OptionsContract
+    kind: ethereum/contract
+    network: kovan
+    source:
+      abi: OptionsContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - OptionsContract
+      abis:
+        - name: OptionsContract
+          file: ./abis/OptionsContract.json
+      eventHandlers:
+        - event: RepoOpened(uint256,address)
+          handler: handleRepoOpened
+        - event: ETHCollateralAdded(uint256,uint256,address)
+          handler: handleETHCollateralAdded
+        - event: ERC20CollateralAdded(uint256,uint256,address)
+          handler: handleERC20CollateralAdded
+        - event: IssuedOTokens(address,uint256,uint256)
+          handler: handleIssuedOTokens
+        - event: Liquidate(uint256,uint256,address)
+          handler: handleLiquidate
+        - event: Exercise(uint256,uint256,address)
+          handler: handleExercise
+        - event: ClaimedCollateral(uint256,uint256,uint256,address)
+          handler: handleClaimedCollateral
+        - event: BurnOTokens(uint256,uint256)
+          handler: handleBurnOTokens
+        - event: TransferRepoOwnership(uint256,address,address)
+          handler: handleTransferRepoOwnership
+        - event: RemoveCollateral(uint256,uint256,address)
+          handler: handleRemoveCollateral

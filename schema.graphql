@@ -147,3 +147,60 @@ type SupportedAsset @entity {
   " Asset Address "
   address: Bytes!
 }
+
+type OptionsContract @entity {
+  " Equals to: Contract address "
+  id: ID!
+
+  " OptionsContract address"
+  address: Bytes!
+
+  " Contract owner address"
+  owner: Bytes!
+
+  " The minimum ratio of a repo's collateral to insurance promised - Value "
+  collateralizationRatioValue: BigInt!
+
+  " The minimum ratio of a repo's collateral to insurance promised - Exponent "
+  collateralizationRatioExp: BigInt!
+
+  " The amount of underlying that 1 oToken protects - Value "
+  oTokenExchangeRateValue: BigInt!
+
+  " The amount of underlying that 1 oToken protects - Exponent "
+  oTokenExchangeRateExp: BigInt!
+
+  " The amount of insurance promised per oToken - Value "
+  strikePriceValue: BigInt!
+
+  " The amount of insurance promised per oToken - Exponent "
+  strikePriceExp: BigInt!
+
+  " The time of expiry of the options contract "
+  expiry: BigInt!
+
+  " The collateral asset "
+  collateral: Bytes!
+
+  " The asset that is being protected "
+  underlying: Bytes!
+
+  " The asset in which the insurance is calculated "
+  strike: Bytes!
+
+  " The total collateral withdrawn from the Options Contract every time the exercise function is called "
+  totalExercised: BigInt!
+
+
+  # repos - TODO
+  # actions - TODO
+
+  " Block number when the contract was created "
+  block: BigInt!
+
+  " Transaction hash (tx)  where the contract was created "
+  transactionHash: Bytes!
+
+  " Timestamp as seconds (time)  when the contract was created "
+  timestamp: BigInt!
+}

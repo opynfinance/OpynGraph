@@ -2,13 +2,18 @@ import { Address, BigInt, log, store } from '@graphprotocol/graph-ts'
 
 import { OptionsFactory, OptionsContractCreated, AssetAdded, AssetChanged, AssetDeleted, OwnershipTransferred } from '../generated/OptionsFactory/OptionsFactory'
 
+import { OptionsContract } from '../generated/OptionsFactory/OptionsContract'
+
+import { OptionsContract as OptionsContractTemplate } from '../generated/templates'
+
 import {
   OptionsFactory as OptionsFactoryState,
   SupportedAsset,
   AssetAdded as AssetAddedState,
   AssetChanged as AssetChangedState,
   AssetDeleted as AssetDeletedState,
-  FactoryOwnershipTransferred
+  FactoryOwnershipTransferred,
+  OptionsContract as OptionsContractEntity
 } from '../generated/schema'
 
 import { BIGINT_ZERO } from './helpers'
@@ -30,7 +35,43 @@ export function getOptionsFactory(address: Address): OptionsFactoryState {
   return state as OptionsFactoryState
 }
 
-export function handleOptionsContractCreated(event: OptionsContractCreated): void {}
+export function handleOptionsContractCreated(event: OptionsContractCreated): void {
+  let optionsAddress = event.params.addr
+
+  // Start traking the new OptionsContract
+  OptionsContractTemplate.create(optionsAddress)
+
+  // Bind OptionsContract for getting its data
+  let boundOptionsContract = OptionsContract.bind(optionsAddress)
+  let owner = boundOptionsContract.owner()
+  let collateralizationRatio = boundOptionsContract.collateralizationRatio()
+  let oTokenExchangeRate = boundOptionsContract.oTokenExchangeRate()
+  let strikePrice = boundOptionsContract.strikePrice()
+  let expiry = boundOptionsContract.expiry()
+  let collateral = boundOptionsContract.collateral()
+  let underlying = boundOptionsContract.underlying()
+  let strike = boundOptionsContract.strike()
+
+  // Create new entity
+  let optionsContract = new OptionsContractEntity(optionsAddress.toHexString())
+  optionsContract.address = optionsAddress
+  optionsContract.owner = owner
+  optionsContract.collateralizationRatioValue = collateralizationRatio.value0
+  optionsContract.collateralizationRatioExp = BigInt.fromI32(collateralizationRatio.value1)
+  optionsContract.oTokenExchangeRateValue = oTokenExchangeRate.value0
+  optionsContract.oTokenExchangeRateExp = BigInt.fromI32(oTokenExchangeRate.value1)
+  optionsContract.strikePriceValue = strikePrice.value0
+  optionsContract.strikePriceExp = BigInt.fromI32(strikePrice.value1)
+  optionsContract.expiry = expiry
+  optionsContract.collateral = collateral
+  optionsContract.underlying = underlying
+  optionsContract.strike = strike
+  optionsContract.totalExercised = BIGINT_ZERO
+  optionsContract.block = event.block.number
+  optionsContract.transactionHash = event.transaction.hash
+  optionsContract.timestamp = event.block.timestamp
+  optionsContract.save()
+}
 
 export function handleAssetAdded(event: AssetAdded): void {
   getOptionsFactory(event.address)
