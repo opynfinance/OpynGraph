@@ -47,6 +47,9 @@ templates:
       file: ./src/index.ts
       entities:
         - OptionsContract
+        - RepoOpened
+        - Exercise
+        - Repo
       abis:
         - name: OptionsContract
           file: ./abis/OptionsContract.json
@@ -71,3 +74,5 @@ templates:
           handler: handleTransferRepoOwnership
         - event: RemoveCollateral(uint256,uint256,address)
           handler: handleRemoveCollateral
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOptionsContractOwnershipTransferred

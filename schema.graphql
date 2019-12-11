@@ -15,6 +15,7 @@ interface FactoryAction {
   " Equals to: <actionType>-<transactionHash>-<logIndex> "
   id: ID!
 
+  " OptionsFactory the action is related to"
   factory: OptionsFactory
 
   " Block number "
@@ -31,6 +32,7 @@ type OptionsContractCreated implements FactoryAction @entity {
   " Equals to: <OPTIONS-CREATED>-<transactionHash>-<logIndex> "
   id: ID!
 
+  " OptionsFactory the action is related to"
   factory: OptionsFactory
 
   " OptionsContract address "
@@ -50,6 +52,7 @@ type AssetAdded implements FactoryAction @entity {
   " Equals to: <ASSET-ADDED>-<transactionHash>-<logIndex> "
   id: ID!
 
+  " OptionsFactory the action is related to"
   factory: OptionsFactory
 
   " Asset name "
@@ -72,6 +75,7 @@ type AssetChanged implements FactoryAction @entity {
   " Equals to: <ASSET-CHANGED>-<transactionHash>-<logIndex> "
   id: ID!
 
+  " OptionsFactory the action is related to"
   factory: OptionsFactory
 
   " Asset name "
@@ -97,6 +101,7 @@ type AssetDeleted implements FactoryAction @entity {
   " Equals to: <ASSET-DELETED>-<transactionHash>-<logIndex> "
   id: ID!
 
+  " OptionsFactory the action is related to"
   factory: OptionsFactory
 
   " Asset name "
@@ -119,6 +124,7 @@ type FactoryOwnershipTransferred implements FactoryAction @entity {
   " Equals to: <OWNERSHIP-TRANFERRED>-<transactionHash>-<logIndex> "
   id: ID!
 
+  " OptionsFactory the action is related to"
   factory: OptionsFactory
 
   " Previous owner address "
@@ -188,12 +194,18 @@ type OptionsContract @entity {
   " The asset in which the insurance is calculated "
   strike: Bytes!
 
+  " The total collateral added to this OptionsContract "
+  totalCollateral: BigInt!
+
+    " The total collateral liquidated from this OptionsContract "
+  totalLiquidated: BigInt!
+
   " The total collateral withdrawn from the Options Contract every time the exercise function is called "
   totalExercised: BigInt!
 
+  repos: [Repo!] @derivedFrom(field: "optionsContract")
 
-  # repos - TODO
-  # actions - TODO
+  actions: [OptionsContractAction!] @derivedFrom(field: "optionsContract")
 
   " Block number when the contract was created "
   block: BigInt!
@@ -203,4 +215,118 @@ type OptionsContract @entity {
 
   " Timestamp as seconds (time)  when the contract was created "
   timestamp: BigInt!
+}
+
+#
+# OptionsContract Actions
+#
+interface OptionsContractAction {
+  " Equals to: <actionType>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " OptionsContract the action is related to"
+  optionsContract: OptionsContract
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type RepoOpened implements OptionsContractAction @entity {
+  " Equals to: <OPTIONS-CREATED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " OptionsContract the action is related to"
+  optionsContract: OptionsContract
+
+  " Repo owner address "
+  owner: Bytes!
+
+  " Repo index "
+  repoIndex: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type Exercise implements OptionsContractAction @entity {
+  " Equals to: <OPTIONS-CREATED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " OptionsContract the action is related to"
+  optionsContract: OptionsContract
+
+  " Exerciser address "
+  exerciser: Bytes!
+
+  " Amount of underlying paid by the exerciser "
+  amtUnderlyingToPay: BigInt!
+
+  " Amount of collateral paid by to exerciser "
+  amtCollateralToPay: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type OptionsContractOwnershipTransferred implements OptionsContractAction @entity {
+  " Equals to: <OWNERSHIP-TRANFERRED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " OptionsContract the action is related to"
+  optionsContract: OptionsContract
+
+  " Previous owner address "
+  oldOwner: Bytes!
+
+  " New owner number "
+  newOwner: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type Repo @entity {
+  " Equals to: <OptionsContract address>-<repo index> "
+  id: ID!
+
+  " Repo index "
+  index: BigInt!
+
+  " Repo Owner"
+  owner: Bytes!
+
+  " OptionsContract the Repo is related to"
+  optionsContract: OptionsContract!
+
+  " Issue oTokens "
+  putsOutstanding: BigInt!
+
+  "  Collateral added by this repo "
+  collateral: BigInt!
+
+  # actions
 }
