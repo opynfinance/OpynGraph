@@ -328,5 +328,209 @@ type Repo @entity {
   "  Collateral added by this repo "
   collateral: BigInt!
 
-  # actions
+  actions: [RepoAction!] @derivedFrom(field: "repo")
+}
+
+#
+# Repo Actions
+#
+interface RepoAction {
+  " Equals to: <actionType>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type ETHCollateralAdded implements RepoAction @entity {
+  " Equals to: <ETH-COLLATERAL-ADDED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Amount of collateral added "
+  amount: BigInt!
+
+  " Address of payer  "
+  payer: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type ERC20CollateralAdded implements RepoAction @entity {
+  " Equals to: <ERC20-COLLATERAL-ADDED>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Amount of collateral added "
+  amount: BigInt!
+
+  " Address of payer  "
+  payer: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type RemoveCollateral implements RepoAction @entity {
+  " Equals to: <REMOVE-COLLATERAL>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Amount of collateral removed "
+  amount: BigInt!
+
+  " Address of owner removing the collateral "
+  owner: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type IssuedOTokens implements RepoAction @entity {
+  " Equals to: <ISSUED-OTOKENS>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Amount of oTokens issued "
+  amount: BigInt!
+
+  " Address who receive the oTokens  "
+  issuedTo: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type Liquidate implements RepoAction @entity {
+  " Equals to: <LIQUIDATE>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Amount of collateral paid to liquidator "
+  collateralToPay: BigInt!
+
+  " Address who liquidates the repo  "
+  liquidator: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type ClaimedCollateral implements RepoAction @entity {
+  " Equals to: <CLAIMED-COLLATERAL>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Amount of collateral claimed "
+  collateralClaimed: BigInt!
+
+  " Amount of underlying claimed "
+  underlyingClaimed: BigInt!
+
+  " Address who liquidates the repo  "
+  liquidator: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type BurnOTokens implements RepoAction @entity {
+  " Equals to: <BURN-OTOKENS>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Amount of oTokens burned "
+  burned: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type TransferRepoOwnership implements RepoAction @entity {
+  " Equals to: <BURN-OTOKENS>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Repo the action is related to"
+  repo: Repo
+
+  " Previous owner address "
+  oldOwner: Bytes!
+
+  " New owner number "
+  newOwner: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
 }

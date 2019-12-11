@@ -6,14 +6,28 @@ import {
   OwnershipTransferred,
   ETHCollateralAdded,
   ERC20CollateralAdded,
-  RemoveCollateral
+  RemoveCollateral,
+  IssuedOTokens,
+  Liquidate,
+  ClaimedCollateral,
+  BurnOTokens,
+  TransferRepoOwnership,
+
 } from '../generated/templates/OptionsContract/OptionsContract'
 import {
   OptionsContract as OptionsContractState,
   Repo,
   RepoOpened as RepoOpenedAction,
   Exercise,
-  OptionsContractOwnershipTransferred
+  OptionsContractOwnershipTransferred,
+  ETHCollateralAdded as ETHCollateralAddedAction,
+  ERC20CollateralAdded as ERC20CollateralAddedAction,
+  RemoveCollateral as RemoveCollateralAction,
+  IssuedOTokens as IssuedOTokensAction,
+  Liquidate as LiquidateAction,
+  ClaimedCollateral as ClaimedCollateralAction,
+  BurnOTokens as BurnOTokensAction,
+  TransferRepoOwnership as TransferRepoOwnershipAction,
 } from '../generated/schema'
 import {
   BIGINT_ZERO
@@ -90,7 +104,16 @@ export function handleETHCollateralAdded(event: ETHCollateralAdded): void {
     if (repo !== null) {
       repo.collateral = repo.collateral.plus(event.params.amount)
       repo.save()
-      // TODO - save repo action
+
+      let actionId = 'ETH-COLLATERAL-ADDED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+      let action = new ETHCollateralAddedAction(actionId)
+      action.repo = repoId
+      action.amount = event.params.amount
+      action.payer = event.params.payer
+      action.block = event.block.number
+      action.transactionHash = event.transaction.hash
+      action.timestamp = event.block.timestamp
+      action.save()
     } else {
       log.warning('handleETHCollateralAdded: No Repo with id {} found.', [repoId])
     }
@@ -114,7 +137,16 @@ export function handleERC20CollateralAdded(event: ERC20CollateralAdded): void {
     if (repo !== null) {
       repo.collateral = repo.collateral.plus(event.params.amount)
       repo.save()
-      // TODO - save repo action
+
+      let actionId = 'ERC20-COLLATERAL-ADDED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+      let action = new ERC20CollateralAddedAction(actionId)
+      action.repo = repoId
+      action.amount = event.params.amount
+      action.payer = event.params.payer
+      action.block = event.block.number
+      action.transactionHash = event.transaction.hash
+      action.timestamp = event.block.timestamp
+      action.save()
     } else {
       log.warning('handleERC20CollateralAdded: No Repo with id {} found.', [repoId])
     }
@@ -138,7 +170,16 @@ export function handleRemoveCollateral(event: RemoveCollateral): void {
     if (repo !== null) {
       repo.collateral = repo.collateral.minus(event.params.amtRemoved)
       repo.save()
-      // TODO - save repo action
+
+      let actionId = 'REMOVE-COLLATERAL-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+      let action = new RemoveCollateralAction(actionId)
+      action.repo = repoId
+      action.amount = event.params.amtRemoved
+      action.owner = event.params.repoOwner
+      action.block = event.block.number
+      action.transactionHash = event.transaction.hash
+      action.timestamp = event.block.timestamp
+      action.save()
     } else {
       log.warning('handleRemoveCollateral: No Repo with id {} found.', [repoId])
     }
