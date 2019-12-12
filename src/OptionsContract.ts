@@ -213,7 +213,6 @@ export function handleRemoveCollateral(event: RemoveCollateral): void {
 
 export function handleIssuedOTokens(event:  IssuedOTokens): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
 
   // add putsOutstanding to repo
   let repoId = optionsContractId + '-' + event.params.repoIndex.toString()
@@ -238,7 +237,6 @@ export function handleIssuedOTokens(event:  IssuedOTokens): void {
 
 export function handleBurnOTokens(event: BurnOTokens): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
 
   // remove putsOutstanding to repo
   let repoId = optionsContractId + '-' + event.params.repoIndex.toString()
@@ -260,7 +258,41 @@ export function handleBurnOTokens(event: BurnOTokens): void {
   }
 }
 
-export function handleLiquidate(): void {}
+export function handleLiquidate(event: Liquidate): void {
+  let optionsContractId = event.address.toHexString()
+  let optionsContract = OptionsContractState.load(optionsContractId)
+  if (optionsContract !== null) {
+    // uptate totalLiquidated an totalCollateral
+    optionsContract.totalCollateral = optionsContract.totalCollateral.minus(event.params.amtCollateralToPay)
+    optionsContract.totalLiquidated = optionsContract.totalLiquidated.plus(event.params.amtCollateralToPay)
+    optionsContract.save()
+
+    // update collateral and putsOutstanding in repo
+    let repoId = optionsContractId + '-' + event.params.repoIndex.toString()
+    let repo = Repo.load(repoId)
+    if (repo !== null) {
+      let optionsContract = OptionsContract.bind(event.address)
+      let repoNewState = optionsContract.repos(event.params.repoIndex)
+      repo.collateral = repoNewState.value0
+      repo.putsOutstanding = repoNewState.value1
+      repo.save()
+
+      let actionId = 'LIQUIDATE-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+      let action = new LiquidateAction(actionId)
+      action.repo = repoId
+      action.collateralToPay = event.params.amtCollateralToPay
+      action.liquidator = event.params.liquidator
+      action.block = event.block.number
+      action.transactionHash = event.transaction.hash
+      action.timestamp = event.block.timestamp
+      action.save()
+    } else {
+      log.warning('handleLiquidate: No Repo with id {} found.', [repoId])
+    }
+  } else {
+    log.warning('handleLiquidate: No OptionsContract with id {} found.', [optionsContractId])
+  }
+}
 
 export function handleClaimedCollateral(): void {}
 
