@@ -482,8 +482,8 @@ type ClaimedCollateral implements RepoAction @entity {
   " Amount of underlying claimed "
   underlyingClaimed: BigInt!
 
-  " Address who liquidates the repo  "
-  liquidator: Bytes!
+  " Address who claims the repo  "
+  claimedBy: Bytes!
 
   " Block number "
   block: BigInt!

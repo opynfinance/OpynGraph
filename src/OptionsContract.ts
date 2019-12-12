@@ -261,6 +261,7 @@ export function handleBurnOTokens(event: BurnOTokens): void {
 export function handleLiquidate(event: Liquidate): void {
   let optionsContractId = event.address.toHexString()
   let optionsContract = OptionsContractState.load(optionsContractId)
+
   if (optionsContract !== null) {
     // uptate totalLiquidated an totalCollateral
     optionsContract.totalCollateral = optionsContract.totalCollateral.minus(event.params.amtCollateralToPay)
@@ -294,7 +295,43 @@ export function handleLiquidate(event: Liquidate): void {
   }
 }
 
-export function handleClaimedCollateral(): void {}
+export function handleClaimedCollateral(event: ClaimedCollateral): void {
+  let optionsContractId = event.address.toHexString()
+  let optionsContract = OptionsContractState.load(optionsContractId)
+
+  if (optionsContract !== null) {
+    // uptate totalUnderlying an totalCollateral
+    optionsContract.totalCollateral = optionsContract.totalCollateral.minus(event.params.amtCollateralClaimed)
+    optionsContract.totalUnderlying = optionsContract.totalUnderlying.minus(event.params.amtUnderlyingClaimed)
+    optionsContract.save()
+
+    // update collateral and putsOutstanding in repo
+    let repoId = optionsContractId + '-' + event.params.repoIndex.toString()
+    let repo = Repo.load(repoId)
+    if (repo !== null) {
+      let optionsContract = OptionsContract.bind(event.address)
+      let repoNewState = optionsContract.repos(event.params.repoIndex)
+      repo.collateral = repoNewState.value0
+      repo.putsOutstanding = repoNewState.value1
+      repo.save()
+
+      let actionId = 'CLAIMED-COLLATERAL-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+      let action = new ClaimedCollateralAction(actionId)
+      action.repo = repoId
+      action.collateralClaimed = event.params.amtCollateralClaimed
+      action.underlyingClaimed = event.params.amtUnderlyingClaimed
+      action.claimedBy = event.params.repoOwner
+      action.block = event.block.number
+      action.transactionHash = event.transaction.hash
+      action.timestamp = event.block.timestamp
+      action.save()
+    } else {
+      log.warning('handleClaimedCollateral: No Repo with id {} found.', [repoId])
+    }
+  } else {
+    log.warning('handleClaimedCollateral: No OptionsContract with id {} found.', [optionsContractId])
+  }
+}
 
 export function handleTransferRepoOwnership(event: TransferRepoOwnership): void {
   let repoId = event.address.toHexString() + '-' + event.params.repoIndex.toString()
