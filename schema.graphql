@@ -420,7 +420,7 @@ type RemoveCollateral implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type IssuedOTokens implements RepoAction @entity {
+type IssuedOToken implements RepoAction @entity {
   " Equals to: <ISSUED-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -492,7 +492,7 @@ type ClaimedCollateral implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type BurnOTokens implements RepoAction @entity {
+type BurnOToken implements RepoAction @entity {
   " Equals to: <BURN-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
 

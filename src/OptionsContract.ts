@@ -12,8 +12,8 @@ import {
   ClaimedCollateral,
   BurnOTokens,
   TransferRepoOwnership,
-
 } from '../generated/templates/OptionsContract/OptionsContract'
+
 import {
   OptionsContract as OptionsContractState,
   Repo,
@@ -23,10 +23,10 @@ import {
   ETHCollateralAdded as ETHCollateralAddedAction,
   ERC20CollateralAdded as ERC20CollateralAddedAction,
   RemoveCollateral as RemoveCollateralAction,
-  IssuedOTokens as IssuedOTokensAction,
+  IssuedOToken as IssuedOTokensAction,
   Liquidate as LiquidateAction,
   ClaimedCollateral as ClaimedCollateralAction,
-  BurnOTokens as BurnOTokensAction,
+  BurnOToken as BurnOTokensAction,
   TransferRepoOwnership as TransferRepoOwnershipAction,
 } from '../generated/schema'
 import {
@@ -188,9 +188,54 @@ export function handleRemoveCollateral(event: RemoveCollateral): void {
   }
 }
 
-export function handleIssuedOTokens(): void {}
+export function handleIssuedOTokens(event:  IssuedOTokens): void {
+  let optionsContractId = event.address.toHexString()
+  let optionsContract = OptionsContractState.load(optionsContractId)
 
-export function handleBurnOTokens(): void {}
+  // add putsOutstanding to repo
+  let repoId = optionsContractId + '-' + event.params.repoIndex.toString()
+  let repo = Repo.load(repoId)
+  if (repo !== null) {
+    repo.putsOutstanding = repo.putsOutstanding.plus(event.params.oTokensIssued)
+    repo.save()
+
+    let actionId = 'ISSUED-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let action = new IssuedOTokensAction(actionId)
+    action.repo = repoId
+    action.amount = event.params.oTokensIssued
+    action.issuedTo = event.params.issuedTo
+    action.block = event.block.number
+    action.transactionHash = event.transaction.hash
+    action.timestamp = event.block.timestamp
+    action.save()
+  } else {
+    log.warning('handleIssuedOTokens: No Repo with id {} found.', [repoId])
+  }
+}
+
+export function handleBurnOTokens(event: BurnOTokens): void {
+  let optionsContractId = event.address.toHexString()
+  let optionsContract = OptionsContractState.load(optionsContractId)
+
+  // remove putsOutstanding to repo
+  let repoId = optionsContractId + '-' + event.params.repoIndex.toString()
+  let repo = Repo.load(repoId)
+  if (repo !== null) {
+    repo.putsOutstanding = repo.putsOutstanding.minus(event.params.oTokensBurned)
+    repo.save()
+
+    let actionId = 'BURN-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let action = new BurnOTokensAction(actionId)
+    action.repo = repoId
+    action.burned = event.params.oTokensBurned
+    action.block = event.block.number
+    action.transactionHash = event.transaction.hash
+    action.timestamp = event.block.timestamp
+    action.save()
+  } else {
+    log.warning('handleBurnOTokens: No Repo with id {} found.', [repoId])
+  }
+}
 
 export function handleLiquidate(): void {}
 
