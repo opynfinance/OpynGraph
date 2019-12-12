@@ -203,6 +203,9 @@ type OptionsContract @entity {
   " The total collateral withdrawn from the Options Contract every time the exercise function is called "
   totalExercised: BigInt!
 
+  " The total amount of underlying that is added to the contract during the exercise window "
+  totalUnderlying: BigInt!
+
   repos: [Repo!] @derivedFrom(field: "optionsContract")
 
   actions: [OptionsContractAction!] @derivedFrom(field: "optionsContract")
@@ -238,7 +241,7 @@ interface OptionsContractAction {
 }
 
 type RepoOpened implements OptionsContractAction @entity {
-  " Equals to: <OPTIONS-CREATED>-<transactionHash>-<logIndex> "
+  " Equals to: <REPO-OPENED>-<transactionHash>-<logIndex> "
   id: ID!
 
   " OptionsContract the action is related to"
@@ -261,7 +264,7 @@ type RepoOpened implements OptionsContractAction @entity {
 }
 
 type Exercise implements OptionsContractAction @entity {
-  " Equals to: <OPTIONS-CREATED>-<transactionHash>-<logIndex> "
+  " Equals to: <EXERCISE>-<transactionHash>-<logIndex> "
   id: ID!
 
   " OptionsContract the action is related to"

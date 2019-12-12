@@ -4,6 +4,7 @@ import {
   OptionsContract,
   RepoOpened,
   OwnershipTransferred,
+  Exercise,
   ETHCollateralAdded,
   ERC20CollateralAdded,
   RemoveCollateral,
@@ -18,7 +19,7 @@ import {
   OptionsContract as OptionsContractState,
   Repo,
   RepoOpened as RepoOpenedAction,
-  Exercise,
+  Exercise as ExerciseAction,
   OptionsContractOwnershipTransferred,
   ETHCollateralAdded as ETHCollateralAddedAction,
   ERC20CollateralAdded as ERC20CollateralAddedAction,
@@ -49,7 +50,7 @@ export function handleRepoOpened(event: RepoOpened): void {
     repo.collateral = BIGINT_ZERO
     repo.save()
 
-    let actionId = 'REPO-OPENED' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let actionId = 'REPO-OPENED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
     let action = new RepoOpenedAction(actionId)
     action.optionsContract = optionsContractId
     action.owner = event.params.repoOwner
@@ -63,7 +64,29 @@ export function handleRepoOpened(event: RepoOpened): void {
   }
 }
 
-export function handleExercise(): void {}
+export function handleExercise(event: Exercise): void {
+  let optionsContractId = event.address.toHexString()
+  let optionsContract = OptionsContractState.load(optionsContractId)
+
+  if (optionsContract !== null) {
+    optionsContract.totalExercised = optionsContract.totalExercised.plus(event.params.amtCollateralToPay)
+    optionsContract.totalUnderlying = optionsContract.totalUnderlying.plus(event.params.amtUnderlyingToPay)
+    optionsContract.save()
+
+    let actionId = 'EXERCISE-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let action = new ExerciseAction(actionId)
+    action.optionsContract = optionsContractId
+    action.exerciser = event.params.exerciser
+    action.amtUnderlyingToPay = event.params.amtUnderlyingToPay
+    action.amtCollateralToPay = event.params.amtCollateralToPay
+    action.block = event.block.number
+    action.transactionHash = event.transaction.hash
+    action.timestamp = event.block.timestamp
+    action.save()
+  } else {
+    log.warning('handleRepoOpened: No OptionsContract with id {} found.', [optionsContractId])
+  }
+}
 
 export function handleOptionsContractOwnershipTransferred(event: OwnershipTransferred): void {
   let optionsContractId = event.address.toHexString()
@@ -241,4 +264,24 @@ export function handleLiquidate(): void {}
 
 export function handleClaimedCollateral(): void {}
 
-export function handleTransferRepoOwnership(): void {}
+export function handleTransferRepoOwnership(event: TransferRepoOwnership): void {
+  let repoId = event.address.toHexString() + '-' + event.params.repoIndex.toString()
+  let repo = Repo.load(repoId)
+
+  if (repo !== null) {
+    repo.owner = event.params.newOwner
+    repo.save()
+
+    let actionId = 'OWNERSHIP-TRANFERRED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let action = new TransferRepoOwnershipAction(actionId)
+    action.repo = repoId
+    action.oldOwner = event.params.oldOwner
+    action.newOwner = event.params.newOwner
+    action.block = event.block.number
+    action.transactionHash = event.transaction.hash
+    action.timestamp = event.block.timestamp
+    action.save()
+  } else {
+    log.warning('handleTransferRepoOwnership: No Repo with id {} found.', [repoId])
+  }
+}

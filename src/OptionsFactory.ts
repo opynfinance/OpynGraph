@@ -69,6 +69,7 @@ export function handleOptionsContractCreated(event: OptionsContractCreated): voi
   optionsContract.totalCollateral = BIGINT_ZERO
   optionsContract.totalLiquidated = BIGINT_ZERO
   optionsContract.totalExercised = BIGINT_ZERO
+  optionsContract.totalUnderlying = BIGINT_ZERO
   optionsContract.block = event.block.number
   optionsContract.transactionHash = event.transaction.hash
   optionsContract.timestamp = event.block.timestamp

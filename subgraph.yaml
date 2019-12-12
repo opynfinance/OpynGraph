@@ -8,9 +8,9 @@ dataSources:
     name: OptionsFactory
     network: kovan
     source:
-      address: '0x26DB47f8D95449390fe2BcDD429CDAf4E1Cf158B'
+      address: '0x7f65609c3d8FB863FfbfDC940D03FB72FCfc15D1'
       abi: OptionsFactory
-      startBlock: 15404542
+      startBlock: 15405380
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
