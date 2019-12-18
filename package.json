@@ -4,6 +4,7 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
+    "auth": "graph auth https://api.thegraph.com/deploy/ <ACCESS_TOKEN>",
     "deploy": "graph deploy aparnakr/opyn --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/"
   },
   "devDependencies": {
