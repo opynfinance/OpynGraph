@@ -164,11 +164,35 @@ type OptionsContract @entity {
   " Contract owner address"
   owner: Bytes!
 
-  " The minimum ratio of a repo's collateral to insurance promised - Value "
-  collateralizationRatioValue: BigInt!
+  " The incentive paid to liquidator - Value "
+  liquidationIncentiveValue: BigInt!
 
-  " The minimum ratio of a repo's collateral to insurance promised - Exponent "
-  collateralizationRatioExp: BigInt!
+  " The incentive paid to liquidator - Exponent "
+  liquidationIncentiveExp: BigInt!
+
+  " The fees paid to our protocol every time a execution happens - Value "
+  transactionFeeValue: BigInt!
+
+  " The fees paid to our protocol every time a execution happens - Exponent "
+  transactionFeeExp: BigInt!
+
+  " Max amount that a Vault can be liquidated by - Value "
+  liquidationFactorValue: BigInt!
+
+  " Max amount that a Vault can be liquidated by - Exponent "
+  liquidationFactorExp: BigInt!
+
+  " The fees paid to our protocol every time a liquidation happens - Value "
+  liquidationFeeValue: BigInt!
+
+  " The fees paid to our protocol every time a liquidation happens - Exponent "
+  liquidationFeeExp: BigInt!
+
+  " The minimum ratio of a vault's collateral to insurance promised - Value "
+  minCollateralizationRatioValue: BigInt!
+
+  " The minimum ratio of a vault's collateral to insurance promised - Exponent "
+  minCollateralizationRatioExp: BigInt!
 
   " The amount of underlying that 1 oToken protects - Value "
   oTokenExchangeRateValue: BigInt!
@@ -197,7 +221,7 @@ type OptionsContract @entity {
   " The total collateral added to this OptionsContract "
   totalCollateral: BigInt!
 
-    " The total collateral liquidated from this OptionsContract "
+  " The total collateral liquidated from this OptionsContract "
   totalLiquidated: BigInt!
 
   " The total collateral withdrawn from the Options Contract every time the exercise function is called "
@@ -206,7 +230,7 @@ type OptionsContract @entity {
   " The total amount of underlying that is added to the contract during the exercise window "
   totalUnderlying: BigInt!
 
-  repos: [Repo!] @derivedFrom(field: "optionsContract")
+  vaults: [Vault!] @derivedFrom(field: "optionsContract")
 
   actions: [OptionsContractAction!] @derivedFrom(field: "optionsContract")
 
@@ -218,6 +242,34 @@ type OptionsContract @entity {
 
   " Timestamp as seconds (time)  when the contract was created "
   timestamp: BigInt!
+
+  # ERC20
+  " Total number of events (all types)"
+  eventCount: BigInt!
+
+  " Total number of burn events "
+  burnEventCount: BigInt!
+
+  " Total number of mint events "
+  mintEventCount: BigInt!
+
+  " Total number of transfer events "
+  transferEventCount: BigInt!
+
+  " Total token supply "
+  totalSupply: BigDecimal!
+
+  " Total token burned "
+  totalBurned: BigDecimal!
+
+  " Total token minted "
+  totalMinted: BigDecimal!
+
+  " Total token transferred "
+  totalTransferred: BigDecimal!
+
+  " List of token events "
+  events: [TokenEvent!]! @derivedFrom(field: "token")
 }
 
 #
@@ -240,18 +292,15 @@ interface OptionsContractAction {
   timestamp: BigInt!
 }
 
-type RepoOpened implements OptionsContractAction @entity {
-  " Equals to: <REPO-OPENED>-<transactionHash>-<logIndex> "
+type VaultOpened implements OptionsContractAction @entity {
+  " Equals to: <VAULT-OPENED>-<transactionHash>-<logIndex> "
   id: ID!
 
   " OptionsContract the action is related to"
   optionsContract: OptionsContract
 
-  " Repo owner address "
+  " Vault owner address "
   owner: Bytes!
-
-  " Repo index "
-  repoIndex: BigInt!
 
   " Block number "
   block: BigInt!
@@ -289,6 +338,29 @@ type Exercise implements OptionsContractAction @entity {
   timestamp: BigInt!
 }
 
+type TransferFee implements OptionsContractAction @entity {
+  " Equals to: <TRANSFER-FEE>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " OptionsContract the action is related to"
+  optionsContract: OptionsContract
+
+  " To whom the fee is transfered "
+  to: Bytes!
+
+  " Fees amount "
+  fees: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
 type OptionsContractOwnershipTransferred implements OptionsContractAction @entity {
   " Equals to: <OWNERSHIP-TRANFERRED>-<transactionHash>-<logIndex> "
   id: ID!
@@ -312,37 +384,69 @@ type OptionsContractOwnershipTransferred implements OptionsContractAction @entit
   timestamp: BigInt!
 }
 
-type Repo @entity {
-  " Equals to: <OptionsContract address>-<repo index> "
+type UpdateParameters implements OptionsContractAction @entity {
+  " Equals to: <UPDATE-PARAMETERS>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo index "
-  index: BigInt!
+  " OptionsContract the action is related to"
+  optionsContract: OptionsContract
 
-  " Repo Owner"
+  " The incentive paid to liquidator "
+  liquidationIncentive: BigInt!
+
+  " Max amount that a Vault can be liquidated by "
+  liquidationFactor: BigInt!
+
+  " The fees paid to our protocol every time a liquidation happens "
+  liquidationFee: BigInt!
+
+  " The fees paid to our protocol every time a execution "
+  transactionFee: BigInt!
+
+  " The minimum ratio of a Vault's collateral to insurance promised "
+  minCollateralizationRatio: BigInt!
+
+  " Onwer address who performed the action "
   owner: Bytes!
 
-  " OptionsContract the Repo is related to"
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type Vault @entity {
+  " Equals to: <OptionsContract address>-<owner address> "
+  id: ID!
+
+  " Vault Owner"
+  owner: Bytes!
+
+  " OptionsContract the Vault is related to"
   optionsContract: OptionsContract!
 
-  " Issue oTokens "
-  putsOutstanding: BigInt!
+  " Amount of oTokens issued "
+  oTokensIssued: BigInt!
 
-  "  Collateral added by this repo "
+  "  Collateral added by this vault "
   collateral: BigInt!
 
-  actions: [RepoAction!] @derivedFrom(field: "repo")
+  actions: [VaultAction!] @derivedFrom(field: "vault")
 }
 
 #
-# Repo Actions
+# Vault Actions
 #
-interface RepoAction {
+interface VaultAction {
   " Equals to: <actionType>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Block number "
   block: BigInt!
@@ -354,12 +458,12 @@ interface RepoAction {
   timestamp: BigInt!
 }
 
-type ETHCollateralAdded implements RepoAction @entity {
+type ETHCollateralAdded implements VaultAction @entity {
   " Equals to: <ETH-COLLATERAL-ADDED>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Amount of collateral added "
   amount: BigInt!
@@ -377,12 +481,12 @@ type ETHCollateralAdded implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type ERC20CollateralAdded implements RepoAction @entity {
+type ERC20CollateralAdded implements VaultAction @entity {
   " Equals to: <ERC20-COLLATERAL-ADDED>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Amount of collateral added "
   amount: BigInt!
@@ -400,12 +504,12 @@ type ERC20CollateralAdded implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type RemoveCollateral implements RepoAction @entity {
+type RemoveCollateral implements VaultAction @entity {
   " Equals to: <REMOVE-COLLATERAL>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Amount of collateral removed "
   amount: BigInt!
@@ -423,12 +527,12 @@ type RemoveCollateral implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type IssuedOToken implements RepoAction @entity {
+type IssuedOToken implements VaultAction @entity {
   " Equals to: <ISSUED-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Amount of oTokens issued "
   amount: BigInt!
@@ -446,17 +550,17 @@ type IssuedOToken implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type Liquidate implements RepoAction @entity {
+type Liquidate implements VaultAction @entity {
   " Equals to: <LIQUIDATE>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Amount of collateral paid to liquidator "
   collateralToPay: BigInt!
 
-  " Address who liquidates the repo  "
+  " Address who liquidates the vault  "
   liquidator: Bytes!
 
   " Block number "
@@ -469,12 +573,12 @@ type Liquidate implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type ClaimedCollateral implements RepoAction @entity {
+type ClaimedCollateral implements VaultAction @entity {
   " Equals to: <CLAIMED-COLLATERAL>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Amount of collateral claimed "
   collateralClaimed: BigInt!
@@ -482,7 +586,7 @@ type ClaimedCollateral implements RepoAction @entity {
   " Amount of underlying claimed "
   underlyingClaimed: BigInt!
 
-  " Address who claims the repo  "
+  " Address who claims the vault  "
   claimedBy: Bytes!
 
   " Block number "
@@ -495,12 +599,12 @@ type ClaimedCollateral implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type BurnOToken implements RepoAction @entity {
+type BurnOToken implements VaultAction @entity {
   " Equals to: <BURN-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Amount of oTokens burned "
   burned: BigInt!
@@ -515,12 +619,12 @@ type BurnOToken implements RepoAction @entity {
   timestamp: BigInt!
 }
 
-type TransferRepoOwnership implements RepoAction @entity {
-  " Equals to: <BURN-OTOKENS>-<transactionHash>-<logIndex> "
+type TransferVaultOwnership implements VaultAction @entity {
+  " Equals to: <TRANSFER-VAULT-OWNERSHIP>-<transactionHash>-<logIndex> "
   id: ID!
 
-  " Repo the action is related to"
-  repo: Repo
+  " Vault the action is related to"
+  vault: Vault
 
   " Previous owner address "
   oldOwner: Bytes!
@@ -536,4 +640,214 @@ type TransferRepoOwnership implements RepoAction @entity {
 
   " Action timestamp as seconds (time) "
   timestamp: BigInt!
+}
+
+#
+# OptionsExchange actions
+#
+interface OptionsExchangeAction {
+  " Equals to: <actionType>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type SellOTokens implements OptionsExchangeAction @entity {
+  " Equals to: <SELL-OTOKENS>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Seller address "
+  seller: Bytes!
+
+  " The address to send the payout tokens back to "
+  receiver: Bytes!
+
+  " The address of the oToken to sell "
+  oTokenAddress: Bytes!
+
+  " The address of the token to receive the premiums in "
+  payoutTokenAddress: Bytes!
+
+  " The number of oTokens to sell "
+  oTokensToSell: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type BuyOTokens implements OptionsExchangeAction @entity {
+  " Equals to: <BUY-OTOKENS>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Buyer address "
+  buyer: Bytes!
+
+  " he address to send the oTokens back to "
+  receiver: Bytes!
+
+  " The address of the oToken to buy "
+  oTokenAddress: Bytes!
+
+  " The address of the token to pay the premiums in "
+  paymentTokenAddress: Bytes!
+
+  " The number of oTokens to buy "
+  oTokensToBuy: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+#
+# Token events
+#
+interface TokenEvent {
+  id: ID!
+  token: OptionsContract!
+  amount: BigDecimal!
+  sender: Bytes!
+
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+type BurnEvent implements TokenEvent @entity {
+  id: ID!
+
+  " Token address "
+  token: OptionsContract!
+
+  " Quantity of tokens burned "
+  amount: BigDecimal!
+
+  " Transaction sender address "
+  sender: Bytes!
+
+  " Address of burner account "
+  burner: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Event timestamp "
+  timestamp: BigInt!
+
+  " Transaction hash "
+  transaction: Bytes!
+}
+
+type MintEvent implements TokenEvent @entity {
+  id: ID!
+
+  " Token address "
+  token: OptionsContract!
+
+  " Quantity of tokens minted "
+  amount: BigDecimal!
+
+  " Transaction sender address "
+  sender: Bytes!
+
+  " Address of minter account "
+  minter: Bytes!
+
+  " Address of destination account "
+  destination: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Event timestamp "
+  timestamp: BigInt!
+
+  " Transaction hash "
+  transaction: Bytes!
+}
+
+type TransferEvent implements TokenEvent @entity {
+  id: ID!
+
+  " Token address "
+  token: OptionsContract!
+
+  " Quantity of tokens transferred "
+  amount: BigDecimal!
+
+  " Transaction sender address "
+  sender: Bytes!
+
+  " Address of source account "
+  source: Bytes!
+
+  " Address of destination account "
+  destination: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Event timestamp "
+  timestamp: BigInt!
+
+  " Transaction hash "
+  transaction: Bytes!
+}
+
+#
+# Provides information about an Ethereum account
+#
+type Account @entity {
+  " Equals to: <accountAddress>"
+  id: ID!
+
+  " Account address "
+  address: Bytes!
+
+  " Token balances that this account holds "
+  balances: [AccountBalance!]! @derivedFrom(field: "account")
+}
+
+#
+# Current token balance of a particular Ethereum account
+#
+type AccountBalance @entity {
+  " Equals to: <accountAddress>-<tokenAddress>"
+  id: ID!
+
+  " Account address "
+  account: Account!
+
+  " Token address "
+  token: OptionsContract!
+
+  " Current account balance "
+  amount: BigDecimal!
+
+  " Block number in which the balance was last modified "
+  block: BigInt
+
+  " Last modified timestamp in seconds "
+  modified: BigInt
+
+  " Hash of the last transaction that modified the balance "
+  transaction: Bytes
 }

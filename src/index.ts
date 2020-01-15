@@ -7,7 +7,7 @@ export {
 } from './OptionsFactory'
 
 export {
-  handleRepoOpened,
+  handleVaultOpened,
   handleETHCollateralAdded,
   handleERC20CollateralAdded,
   handleIssuedOTokens,
@@ -15,7 +15,13 @@ export {
   handleExercise,
   handleClaimedCollateral,
   handleBurnOTokens,
-  handleTransferRepoOwnership,
+  handleTransferVaultOwnership,
   handleRemoveCollateral,
-  handleOptionsContractOwnershipTransferred
+  handleOptionsContractOwnershipTransferred,
+  handleUpdateParameters,
+  handleTransferFee,
 } from './OptionsContract'
+
+export { handleSellOTokens, handleBuyOTokens } from './OptionsExchange'
+
+export { handleERC20Transfer } from './ERC20'

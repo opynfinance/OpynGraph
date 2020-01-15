@@ -1,6 +1,13 @@
 import { Address, BigInt, log, store } from '@graphprotocol/graph-ts'
 
-import { OptionsFactory, OptionsContractCreated, AssetAdded, AssetChanged, AssetDeleted, OwnershipTransferred } from '../generated/OptionsFactory/OptionsFactory'
+import {
+  OptionsFactory,
+  OptionsContractCreated,
+  AssetAdded,
+  AssetChanged,
+  AssetDeleted,
+  OwnershipTransferred,
+} from '../generated/OptionsFactory/OptionsFactory'
 
 import { OptionsContract } from '../generated/OptionsFactory/OptionsContract'
 
@@ -13,7 +20,7 @@ import {
   AssetChanged as AssetChangedState,
   AssetDeleted as AssetDeletedState,
   FactoryOwnershipTransferred,
-  OptionsContract as OptionsContractEntity
+  OptionsContract as OptionsContractEntity,
 } from '../generated/schema'
 
 import { BIGINT_ZERO } from './helpers'
@@ -44,7 +51,11 @@ export function handleOptionsContractCreated(event: OptionsContractCreated): voi
   // Bind OptionsContract for getting its data
   let boundOptionsContract = OptionsContract.bind(optionsAddress)
   let owner = boundOptionsContract.owner()
-  let collateralizationRatio = boundOptionsContract.collateralizationRatio()
+  let liquidationIncentive = boundOptionsContract.liquidationIncentive()
+  let transactionFee = boundOptionsContract.transactionFee()
+  let liquidationFactor = boundOptionsContract.liquidationFactor()
+  let liquidationFee = boundOptionsContract.liquidationFee()
+  let minCollateralizationRatio = boundOptionsContract.minCollateralizationRatio()
   let oTokenExchangeRate = boundOptionsContract.oTokenExchangeRate()
   let strikePrice = boundOptionsContract.strikePrice()
   let expiry = boundOptionsContract.expiry()
@@ -56,8 +67,18 @@ export function handleOptionsContractCreated(event: OptionsContractCreated): voi
   let optionsContract = new OptionsContractEntity(optionsAddress.toHexString())
   optionsContract.address = optionsAddress
   optionsContract.owner = owner
-  optionsContract.collateralizationRatioValue = collateralizationRatio.value0
-  optionsContract.collateralizationRatioExp = BigInt.fromI32(collateralizationRatio.value1)
+  optionsContract.liquidationIncentiveValue = liquidationIncentive.value0
+  optionsContract.liquidationIncentiveExp = BigInt.fromI32(liquidationIncentive.value1)
+  optionsContract.transactionFeeValue = transactionFee.value0
+  optionsContract.transactionFeeExp = BigInt.fromI32(transactionFee.value1)
+  optionsContract.liquidationFactorValue = liquidationFactor.value0
+  optionsContract.liquidationFactorExp = BigInt.fromI32(liquidationFactor.value1)
+  optionsContract.liquidationFeeValue = liquidationFee.value0
+  optionsContract.liquidationFeeExp = BigInt.fromI32(liquidationFee.value1)
+  optionsContract.minCollateralizationRatioValue = minCollateralizationRatio.value0
+  optionsContract.minCollateralizationRatioExp = BigInt.fromI32(
+    minCollateralizationRatio.value1,
+  )
   optionsContract.oTokenExchangeRateValue = oTokenExchangeRate.value0
   optionsContract.oTokenExchangeRateExp = BigInt.fromI32(oTokenExchangeRate.value1)
   optionsContract.strikePriceValue = strikePrice.value0
@@ -73,6 +94,16 @@ export function handleOptionsContractCreated(event: OptionsContractCreated): voi
   optionsContract.block = event.block.number
   optionsContract.transactionHash = event.transaction.hash
   optionsContract.timestamp = event.block.timestamp
+
+  optionsContract.eventCount = BIGINT_ZERO
+  optionsContract.burnEventCount = BIGINT_ZERO
+  optionsContract.mintEventCount = BIGINT_ZERO
+  optionsContract.transferEventCount = BIGINT_ZERO
+  optionsContract.totalSupply = BIGINT_ZERO.toBigDecimal()
+  optionsContract.totalBurned = BIGINT_ZERO.toBigDecimal()
+  optionsContract.totalMinted = BIGINT_ZERO.toBigDecimal()
+  optionsContract.totalTransferred = BIGINT_ZERO.toBigDecimal()
+
   optionsContract.save()
 }
 
@@ -84,7 +115,8 @@ export function handleAssetAdded(event: AssetAdded): void {
   asset.address = event.params.addr
   asset.save()
 
-  let actionId = 'ASSET-ADDED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let actionId =
+    'ASSET-ADDED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let action = new AssetAddedState(actionId)
   action.factory = OPTION_CONTRACT_STATE_KEY
   action.asset = event.params.asset.toHexString()
@@ -105,7 +137,8 @@ export function handleAssetChanged(event: AssetChanged): void {
     asset.address = event.params.addr
     asset.save()
 
-    let actionId = 'ASSET-CHANGED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let actionId =
+      'ASSET-CHANGED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
     let action = new AssetChangedState(actionId)
     action.factory = OPTION_CONTRACT_STATE_KEY
     action.asset = event.params.asset.toHexString()
@@ -116,7 +149,9 @@ export function handleAssetChanged(event: AssetChanged): void {
     action.timestamp = event.block.timestamp
     action.save()
   } else {
-    log.warning('handleAssetChanged: No Asset with id {} found.', [event.params.asset.toHexString()])
+    log.warning('handleAssetChanged: No Asset with id {} found.', [
+      event.params.asset.toHexString(),
+    ])
   }
 }
 
@@ -128,7 +163,8 @@ export function handleAssetDeleted(event: AssetDeleted): void {
   if (asset !== null) {
     store.remove('SupportedAsset', event.params.asset.toHexString())
 
-    let actionId = 'ASSET-DELETED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let actionId =
+      'ASSET-DELETED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
     let action = new AssetDeletedState(actionId)
     action.factory = OPTION_CONTRACT_STATE_KEY
     action.asset = event.params.asset.toHexString()
@@ -138,7 +174,9 @@ export function handleAssetDeleted(event: AssetDeleted): void {
     action.timestamp = event.block.timestamp
     action.save()
   } else {
-    log.warning('handleAssetChanged: No Asset with id {} found.', [event.params.asset.toHexString()])
+    log.warning('handleAssetChanged: No Asset with id {} found.', [
+      event.params.asset.toHexString(),
+    ])
   }
 }
 
@@ -147,7 +185,11 @@ export function handleOwnershipTransferred(event: OwnershipTransferred): void {
   optionFactory.owner = event.params.newOwner
   optionFactory.save()
 
-  let actionId = 'OWNERSHIP-TRANFERRED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let actionId =
+    'OWNERSHIP-TRANFERRED-' +
+    event.transaction.hash.toHex() +
+    '-' +
+    event.logIndex.toString()
   let action = new FactoryOwnershipTransferred(actionId)
   action.factory = OPTION_CONTRACT_STATE_KEY
   action.oldOwner = event.params.previousOwner

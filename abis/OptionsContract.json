@@ -1,24 +1,5 @@
 [
   {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_token",
-        "type": "address"
-      }
-    ],
-    "name": "getExchange",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "constant": false,
     "inputs": [
       {
@@ -83,6 +64,24 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "liquidationFactor",
+    "outputs": [
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "exponent",
+        "type": "int32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
@@ -112,33 +111,6 @@
     "outputs": [
       {
         "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "repos",
-    "outputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "putsOutstanding",
-        "type": "uint256"
-      },
-      {
-        "name": "owner",
         "type": "address"
       }
     ],
@@ -205,6 +177,24 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "liquidationIncentive",
+    "outputs": [
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "exponent",
+        "type": "int32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -224,6 +214,42 @@
       {
         "name": "",
         "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "transactionFee",
+    "outputs": [
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "exponent",
+        "type": "int32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "liquidationFee",
+    "outputs": [
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "exponent",
+        "type": "int32"
       }
     ],
     "payable": false,
@@ -293,7 +319,53 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "underlyingExp",
+    "outputs": [
+      {
+        "name": "",
+        "type": "int32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "collateralExp",
+    "outputs": [
+      {
+        "name": "",
+        "type": "int32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "oTokenExchangeRate",
+    "outputs": [
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "exponent",
+        "type": "int32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "minCollateralizationRatio",
     "outputs": [
       {
         "name": "value",
@@ -329,43 +401,11 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "UNISWAP_FACTORY",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
     "name": "collateral",
     "outputs": [
       {
         "name": "",
         "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "collateralizationRatio",
-    "outputs": [
-      {
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "name": "exponent",
-        "type": "int32"
       }
     ],
     "payable": false,
@@ -438,6 +478,10 @@
         "type": "address"
       },
       {
+        "name": "_underlyingExp",
+        "type": "int32"
+      },
+      {
         "name": "_oTokenExchangeExp",
         "type": "int32"
       },
@@ -462,6 +506,10 @@
         "type": "address"
       },
       {
+        "name": "_oracleAddress",
+        "type": "address"
+      },
+      {
         "name": "_windowSize",
         "type": "uint256"
       }
@@ -471,25 +519,15 @@
     "type": "constructor"
   },
   {
-    "payable": true,
-    "stateMutability": "payable",
-    "type": "fallback"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "repoOwner",
+        "name": "vaultOwner",
         "type": "address"
       }
     ],
-    "name": "RepoOpened",
+    "name": "VaultOpened",
     "type": "event"
   },
   {
@@ -497,8 +535,8 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -519,8 +557,8 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -551,8 +589,8 @@
       },
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       }
     ],
     "name": "IssuedOTokens",
@@ -568,8 +606,8 @@
       },
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -617,12 +655,7 @@
       },
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "repoOwner",
+        "name": "vaultOwner",
         "type": "address"
       }
     ],
@@ -634,8 +667,8 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -651,11 +684,6 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "name": "oldOwner",
         "type": "address"
       },
@@ -665,7 +693,7 @@
         "type": "address"
       }
     ],
-    "name": "TransferRepoOwnership",
+    "name": "TransferVaultOwnership",
     "type": "event"
   },
   {
@@ -673,21 +701,70 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "name": "amtRemoved",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "name": "repoOwner",
+        "name": "vaultOwner",
         "type": "address"
       }
     ],
     "name": "RemoveCollateral",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "liquidationIncentive",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "liquidationFactor",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "liquidationFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "transactionFee",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "minCollateralizationRatio",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "UpdateParameters",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "fees",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferFee",
     "type": "event"
   },
   {
@@ -771,7 +848,7 @@
         "type": "uint256"
       },
       {
-        "name": "_collateralizationRatio",
+        "name": "_minCollateralizationRatio",
         "type": "uint256"
       }
     ],
@@ -796,27 +873,32 @@
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [],
-    "name": "numRepos",
+    "constant": true,
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "hasVault",
     "outputs": [
       {
         "name": "",
-        "type": "uint256"
+        "type": "bool"
       }
     ],
     "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "constant": false,
     "inputs": [],
-    "name": "openRepo",
+    "name": "openVault",
     "outputs": [
       {
         "name": "",
-        "type": "uint256"
+        "type": "bool"
       }
     ],
     "payable": false,
@@ -827,8 +909,8 @@
     "constant": false,
     "inputs": [
       {
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       }
     ],
     "name": "addETHCollateral",
@@ -846,8 +928,8 @@
     "constant": false,
     "inputs": [
       {
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       },
       {
         "name": "amt",
@@ -866,10 +948,57 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "oTokensToExercise",
+        "type": "uint256"
+      }
+    ],
+    "name": "underlyingToTransfer",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isExerciseWindow",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "hasExpired",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
-        "name": "_oTokens",
+        "name": "oTokensToExercise",
         "type": "uint256"
       }
     ],
@@ -883,11 +1012,7 @@
     "constant": false,
     "inputs": [
       {
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
-        "name": "numTokens",
+        "name": "oTokensToIssue",
         "type": "uint256"
       },
       {
@@ -905,30 +1030,11 @@
     "constant": true,
     "inputs": [
       {
-        "name": "_owner",
+        "name": "vaultOwner",
         "type": "address"
       }
     ],
-    "name": "getReposByOwner",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256[]"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "repoIndex",
-        "type": "uint256"
-      }
-    ],
-    "name": "getRepoByIndex",
+    "name": "getVault",
     "outputs": [
       {
         "name": "",
@@ -940,7 +1046,7 @@
       },
       {
         "name": "",
-        "type": "address"
+        "type": "bool"
       }
     ],
     "payable": false,
@@ -970,108 +1076,6 @@
     "constant": false,
     "inputs": [
       {
-        "name": "amtToCreate",
-        "type": "uint256"
-      },
-      {
-        "name": "receiver",
-        "type": "address"
-      }
-    ],
-    "name": "createETHCollateralOptionNewRepo",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": true,
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "amtToCreate",
-        "type": "uint256"
-      },
-      {
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
-        "name": "receiver",
-        "type": "address"
-      }
-    ],
-    "name": "createETHCollateralOption",
-    "outputs": [],
-    "payable": true,
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "amtToCreate",
-        "type": "uint256"
-      },
-      {
-        "name": "amtCollateral",
-        "type": "uint256"
-      },
-      {
-        "name": "receiver",
-        "type": "address"
-      }
-    ],
-    "name": "createERC20CollateralOptionNewRepo",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "amtToCreate",
-        "type": "uint256"
-      },
-      {
-        "name": "amtCollateral",
-        "type": "uint256"
-      },
-      {
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
-        "name": "receiver",
-        "type": "address"
-      }
-    ],
-    "name": "createERC20CollateralOption",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
         "name": "amtToBurn",
         "type": "uint256"
       }
@@ -1086,15 +1090,11 @@
     "constant": false,
     "inputs": [
       {
-        "name": "repoIndex",
-        "type": "uint256"
-      },
-      {
         "name": "newOwner",
         "type": "address"
       }
     ],
-    "name": "transferRepoOwnership",
+    "name": "transferVaultOwnership",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -1103,10 +1103,6 @@
   {
     "constant": false,
     "inputs": [
-      {
-        "name": "repoIndex",
-        "type": "uint256"
-      },
       {
         "name": "amtToRemove",
         "type": "uint256"
@@ -1120,12 +1116,7 @@
   },
   {
     "constant": false,
-    "inputs": [
-      {
-        "name": "repoIndex",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [],
     "name": "claimCollateral",
     "outputs": [],
     "payable": false,
@@ -1133,14 +1124,33 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "vaultOwner",
+        "type": "address"
+      }
+    ],
+    "name": "maxCollateralLiquidatable",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       },
       {
-        "name": "_oTokens",
+        "name": "oTokensToLiquidate",
         "type": "uint256"
       }
     ],
@@ -1154,8 +1164,8 @@
     "constant": true,
     "inputs": [
       {
-        "name": "repoIndex",
-        "type": "uint256"
+        "name": "vaultOwner",
+        "type": "address"
       }
     ],
     "name": "isUnsafe",
