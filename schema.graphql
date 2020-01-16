@@ -6,6 +6,24 @@ type OptionsFactory @entity {
   owner: Bytes!
 
   actions: [FactoryAction!] @derivedFrom(field: "factory")
+
+  " Total number of actions (all types)"
+  actionCount: BigInt!
+
+  " Total number of burn actions "
+  optionsContractCreatedCount: BigInt!
+
+  " Total number of asset added actions "
+  assetAddedCount: BigInt!
+
+  " Total number of asset changed actions "
+  assetChangedCount: BigInt!
+
+  " Total number of asset deleted actions "
+  assetDeletedCount: BigInt!
+
+  " Total number of factory ownership transferred actions "
+  factoryOwnershipTransferredCount: BigInt!
 }
 
 #
@@ -257,16 +275,16 @@ type OptionsContract @entity {
   transferEventCount: BigInt!
 
   " Total token supply "
-  totalSupply: BigDecimal!
+  totalSupply: BigInt!
 
   " Total token burned "
-  totalBurned: BigDecimal!
+  totalBurned: BigInt!
 
   " Total token minted "
-  totalMinted: BigDecimal!
+  totalMinted: BigInt!
 
   " Total token transferred "
-  totalTransferred: BigDecimal!
+  totalTransferred: BigInt!
 
   " List of token events "
   events: [TokenEvent!]! @derivedFrom(field: "token")
@@ -723,7 +741,7 @@ type BuyOTokens implements OptionsExchangeAction @entity {
 interface TokenEvent {
   id: ID!
   token: OptionsContract!
-  amount: BigDecimal!
+  amount: BigInt!
   sender: Bytes!
 
   block: BigInt!
@@ -738,7 +756,7 @@ type BurnEvent implements TokenEvent @entity {
   token: OptionsContract!
 
   " Quantity of tokens burned "
-  amount: BigDecimal!
+  amount: BigInt!
 
   " Transaction sender address "
   sender: Bytes!
@@ -763,7 +781,7 @@ type MintEvent implements TokenEvent @entity {
   token: OptionsContract!
 
   " Quantity of tokens minted "
-  amount: BigDecimal!
+  amount: BigInt!
 
   " Transaction sender address "
   sender: Bytes!
@@ -791,7 +809,7 @@ type TransferEvent implements TokenEvent @entity {
   token: OptionsContract!
 
   " Quantity of tokens transferred "
-  amount: BigDecimal!
+  amount: BigInt!
 
   " Transaction sender address "
   sender: Bytes!
@@ -840,7 +858,7 @@ type AccountBalance @entity {
   token: OptionsContract!
 
   " Current account balance "
-  amount: BigDecimal!
+  amount: BigInt!
 
   " Block number in which the balance was last modified "
   block: BigInt

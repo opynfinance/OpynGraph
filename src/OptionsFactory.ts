@@ -1,55 +1,56 @@
 import { Address, BigInt, log, store } from '@graphprotocol/graph-ts'
 
 import {
-  OptionsFactory,
-  OptionsContractCreated,
-  AssetAdded,
-  AssetChanged,
-  AssetDeleted,
-  OwnershipTransferred,
+  OptionsFactory as OptionsFactoryEvent,
+  OptionsContractCreated as OptionsContractCreatedEvent,
+  AssetAdded as AssetAddedEvent,
+  AssetChanged as AssetChangedEvent,
+  AssetDeleted as AssetDeletedEvent,
+  OwnershipTransferred as OwnershipTransferredEvent,
 } from '../generated/OptionsFactory/OptionsFactory'
 
-import { OptionsContract } from '../generated/OptionsFactory/OptionsContract'
+import { OptionsContract as OptionsContractSmartContract } from '../generated/OptionsFactory/OptionsContract'
 
 import { OptionsContract as OptionsContractTemplate } from '../generated/templates'
 
 import {
-  OptionsFactory as OptionsFactoryState,
+  OptionsFactory,
   SupportedAsset,
-  AssetAdded as AssetAddedState,
-  AssetChanged as AssetChangedState,
-  AssetDeleted as AssetDeletedState,
+  AssetAdded,
+  AssetChanged,
+  AssetDeleted,
+  OptionsContractCreated,
   FactoryOwnershipTransferred,
-  OptionsContract as OptionsContractEntity,
+  OptionsContract,
 } from '../generated/schema'
 
-import { BIGINT_ZERO } from './helpers'
+import { BIGINT_ZERO, BIGINT_ONE } from './helpers'
 
 const OPTION_CONTRACT_STATE_KEY = '0'
 
-export function getOptionsFactory(address: Address): OptionsFactoryState {
-  let state = OptionsFactoryState.load(OPTION_CONTRACT_STATE_KEY)
+export function getOptionsFactory(address: Address): OptionsFactory {
+  let state = OptionsFactory.load(OPTION_CONTRACT_STATE_KEY)
 
   if (state == null) {
-    state = new OptionsFactoryState(OPTION_CONTRACT_STATE_KEY)
-    let storage = OptionsFactory.bind(address)
+    state = new OptionsFactory(OPTION_CONTRACT_STATE_KEY)
+    let storage = OptionsContractSmartContract.bind(address)
 
     state.optionsExchangeAddress = storage.optionsExchange()
     state.owner = storage.owner()
     state.save()
   }
 
-  return state as OptionsFactoryState
+  return state as OptionsFactory
 }
 
-export function handleOptionsContractCreated(event: OptionsContractCreated): void {
+export function handleOptionsContractCreated(event: OptionsContractCreatedEvent): void {
   let optionsAddress = event.params.addr
 
   // Start traking the new OptionsContract
   OptionsContractTemplate.create(optionsAddress)
 
   // Bind OptionsContract for getting its data
-  let boundOptionsContract = OptionsContract.bind(optionsAddress)
+  let boundOptionsContract = OptionsContractSmartContract.bind(optionsAddress)
   let owner = boundOptionsContract.owner()
   let liquidationIncentive = boundOptionsContract.liquidationIncentive()
   let transactionFee = boundOptionsContract.transactionFee()
@@ -64,7 +65,7 @@ export function handleOptionsContractCreated(event: OptionsContractCreated): voi
   let strike = boundOptionsContract.strike()
 
   // Create new entity
-  let optionsContract = new OptionsContractEntity(optionsAddress.toHexString())
+  let optionsContract = new OptionsContract(optionsAddress.toHexString())
   optionsContract.address = optionsAddress
   optionsContract.owner = owner
   optionsContract.liquidationIncentiveValue = liquidationIncentive.value0
@@ -105,10 +106,27 @@ export function handleOptionsContractCreated(event: OptionsContractCreated): voi
   optionsContract.totalTransferred = BIGINT_ZERO
 
   optionsContract.save()
+
+  let actionId =
+    'OPTIONS-CREATED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let action = new OptionsContractCreated(actionId)
+  action.factory = OPTION_CONTRACT_STATE_KEY
+  action.address = optionsAddress
+  action.block = event.block.number
+  action.transactionHash = event.transaction.hash
+  action.timestamp = event.block.timestamp
+  action.save()
+
+  let optionFactory = getOptionsFactory(event.address)
+  optionFactory.actionCount = optionFactory.actionCount.plus(BIGINT_ONE)
+  optionFactory.optionsContractCreatedCount = optionFactory.optionsContractCreatedCount.plus(
+    BIGINT_ONE,
+  )
+  optionFactory.save()
 }
 
-export function handleAssetAdded(event: AssetAdded): void {
-  getOptionsFactory(event.address)
+export function handleAssetAdded(event: AssetAddedEvent): void {
+  let optionFactory = getOptionsFactory(event.address)
 
   let asset = new SupportedAsset(event.params.asset.toHexString())
   asset.asset = event.params.asset.toHexString()
@@ -117,7 +135,7 @@ export function handleAssetAdded(event: AssetAdded): void {
 
   let actionId =
     'ASSET-ADDED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-  let action = new AssetAddedState(actionId)
+  let action = new AssetAdded(actionId)
   action.factory = OPTION_CONTRACT_STATE_KEY
   action.asset = event.params.asset.toHexString()
   action.address = event.params.addr
@@ -125,10 +143,14 @@ export function handleAssetAdded(event: AssetAdded): void {
   action.transactionHash = event.transaction.hash
   action.timestamp = event.block.timestamp
   action.save()
+
+  optionFactory.actionCount = optionFactory.actionCount.plus(BIGINT_ONE)
+  optionFactory.assetAddedCount = optionFactory.assetAddedCount.plus(BIGINT_ONE)
+  optionFactory.save()
 }
 
-export function handleAssetChanged(event: AssetChanged): void {
-  getOptionsFactory(event.address)
+export function handleAssetChanged(event: AssetChangedEvent): void {
+  let optionFactory = getOptionsFactory(event.address)
 
   let asset = SupportedAsset.load(event.params.asset.toHexString())
 
@@ -139,7 +161,7 @@ export function handleAssetChanged(event: AssetChanged): void {
 
     let actionId =
       'ASSET-CHANGED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-    let action = new AssetChangedState(actionId)
+    let action = new AssetChanged(actionId)
     action.factory = OPTION_CONTRACT_STATE_KEY
     action.asset = event.params.asset.toHexString()
     action.oldAddress = oldAddress
@@ -148,6 +170,10 @@ export function handleAssetChanged(event: AssetChanged): void {
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    optionFactory.actionCount = optionFactory.actionCount.plus(BIGINT_ONE)
+    optionFactory.assetChangedCount = optionFactory.assetChangedCount.plus(BIGINT_ONE)
+    optionFactory.save()
   } else {
     log.warning('handleAssetChanged: No Asset with id {} found.', [
       event.params.asset.toHexString(),
@@ -155,8 +181,8 @@ export function handleAssetChanged(event: AssetChanged): void {
   }
 }
 
-export function handleAssetDeleted(event: AssetDeleted): void {
-  getOptionsFactory(event.address)
+export function handleAssetDeleted(event: AssetDeletedEvent): void {
+  let optionFactory = getOptionsFactory(event.address)
 
   let asset = SupportedAsset.load(event.params.asset.toHexString())
 
@@ -165,7 +191,7 @@ export function handleAssetDeleted(event: AssetDeleted): void {
 
     let actionId =
       'ASSET-DELETED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-    let action = new AssetDeletedState(actionId)
+    let action = new AssetDeleted(actionId)
     action.factory = OPTION_CONTRACT_STATE_KEY
     action.asset = event.params.asset.toHexString()
     action.address = asset.address
@@ -173,6 +199,10 @@ export function handleAssetDeleted(event: AssetDeleted): void {
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    optionFactory.actionCount = optionFactory.actionCount.plus(BIGINT_ONE)
+    optionFactory.assetAddedCount = optionFactory.assetAddedCount.plus(BIGINT_ONE)
+    optionFactory.save()
   } else {
     log.warning('handleAssetChanged: No Asset with id {} found.', [
       event.params.asset.toHexString(),
@@ -180,9 +210,13 @@ export function handleAssetDeleted(event: AssetDeleted): void {
   }
 }
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {
+export function handleOwnershipTransferred(event: OwnershipTransferredEvent): void {
   let optionFactory = getOptionsFactory(event.address)
   optionFactory.owner = event.params.newOwner
+  optionFactory.actionCount = optionFactory.actionCount.plus(BIGINT_ONE)
+  optionFactory.factoryOwnershipTransferredCount = optionFactory.factoryOwnershipTransferredCount.plus(
+    BIGINT_ONE,
+  )
   optionFactory.save()
 
   let actionId =

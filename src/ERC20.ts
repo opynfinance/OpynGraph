@@ -3,7 +3,7 @@ import { BigInt, BigDecimal, Bytes, EthereumEvent } from '@graphprotocol/graph-t
 import { Transfer } from '../generated/templates/OptionsContract/OptionsContract'
 import { BurnEvent, MintEvent, OptionsContract, TransferEvent } from '../generated/schema'
 
-import { toDecimal, BIGINT_ONE } from './helpers'
+import { BIGINT_ONE } from './helpers'
 
 import {
   decreaseAccountBalance,
