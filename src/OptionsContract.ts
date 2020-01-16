@@ -34,7 +34,8 @@ import {
   TransferFeeAction,
   TransferVaultOwnershipAction,
 } from '../generated/schema'
-import { BIGINT_ZERO } from './helpers'
+
+import { BIGINT_ZERO, BIGINT_ONE } from './helpers'
 
 // Option related events
 
@@ -60,6 +61,10 @@ export function handleVaultOpened(event: VaultOpenedEvent): void {
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    optionsContract.actionCount = optionsContract.actionCount.plus(BIGINT_ONE)
+    optionsContract.vaultOpenedCount = optionsContract.vaultOpenedCount.plus(BIGINT_ONE)
+    optionsContract.save()
   } else {
     log.warning('handleVaultOpened: No OptionsContract with id {} found.', [
       optionsContractId,
@@ -91,6 +96,10 @@ export function handleExercise(event: ExerciseEvent): void {
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    optionsContract.actionCount = optionsContract.actionCount.plus(BIGINT_ONE)
+    optionsContract.exerciseCount = optionsContract.exerciseCount.plus(BIGINT_ONE)
+    optionsContract.save()
   } else {
     log.warning('handleExercise: No OptionsContract with id {} found.', [
       optionsContractId,
@@ -121,6 +130,12 @@ export function handleOptionsContractOwnershipTransferred(
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    optionsContract.actionCount = optionsContract.actionCount.plus(BIGINT_ONE)
+    optionsContract.optionsContractOwnershipTransferredCount = optionsContract.optionsContractOwnershipTransferredCount.plus(
+      BIGINT_ONE,
+    )
+    optionsContract.save()
   } else {
     log.warning('handleOwnershipTransferred: No OptionsContract with id {} found.', [
       optionsContractId,
@@ -158,6 +173,12 @@ export function handleUpdateParameters(event: UpdateParametersEvent): void {
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    optionsContract.actionCount = optionsContract.actionCount.plus(BIGINT_ONE)
+    optionsContract.updateParametersCount = optionsContract.updateParametersCount.plus(
+      BIGINT_ONE,
+    )
+    optionsContract.save()
   } else {
     log.warning('handleUpdateParameters: No OptionsContract with id {} found.', [
       optionsContractId,
@@ -185,6 +206,10 @@ export function handleTransferFee(event: TransferFeeEvent): void {
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    optionsContract.actionCount = optionsContract.actionCount.plus(BIGINT_ONE)
+    optionsContract.transferFeeCount = optionsContract.transferFeeCount.plus(BIGINT_ONE)
+    optionsContract.save()
   } else {
     log.warning('handleTransferFee: No OptionsContract with id {} found.', [
       optionsContractId,

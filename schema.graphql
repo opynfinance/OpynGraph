@@ -250,6 +250,24 @@ type OptionsContract @entity {
 
   vaults: [Vault!] @derivedFrom(field: "optionsContract")
 
+  " Total number of actions (all types)"
+  actionCount: BigInt!
+
+  " Total number of vaultOpened actions "
+  vaultOpenedCount: BigInt!
+
+  " Total number of exercise actions "
+  exerciseCount: BigInt!
+
+  " Total number of transferFee actions "
+  transferFeeCount: BigInt!
+
+  " Total number of optionsContractOwnershipTransferred actions "
+  optionsContractOwnershipTransferredCount: BigInt!
+
+  " Total number of updateParameters actions "
+  updateParametersCount: BigInt!
+
   actions: [OptionsContractAction!] @derivedFrom(field: "optionsContract")
 
   " Block number when the contract was created "
