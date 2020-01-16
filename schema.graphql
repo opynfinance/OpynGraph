@@ -46,7 +46,7 @@ interface FactoryAction {
   timestamp: BigInt!
 }
 
-type OptionsContractCreated implements FactoryAction @entity {
+type OptionsContractCreatedAction implements FactoryAction @entity {
   " Equals to: <OPTIONS-CREATED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -66,7 +66,7 @@ type OptionsContractCreated implements FactoryAction @entity {
   timestamp: BigInt!
 }
 
-type AssetAdded implements FactoryAction @entity {
+type AssetAddedAction implements FactoryAction @entity {
   " Equals to: <ASSET-ADDED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -89,7 +89,7 @@ type AssetAdded implements FactoryAction @entity {
   timestamp: BigInt!
 }
 
-type AssetChanged implements FactoryAction @entity {
+type AssetChangedAction implements FactoryAction @entity {
   " Equals to: <ASSET-CHANGED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -115,7 +115,7 @@ type AssetChanged implements FactoryAction @entity {
   timestamp: BigInt!
 }
 
-type AssetDeleted implements FactoryAction @entity {
+type AssetDeletedAction implements FactoryAction @entity {
   " Equals to: <ASSET-DELETED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -138,7 +138,7 @@ type AssetDeleted implements FactoryAction @entity {
   timestamp: BigInt!
 }
 
-type FactoryOwnershipTransferred implements FactoryAction @entity {
+type FactoryOwnershipTransferredAction implements FactoryAction @entity {
   " Equals to: <OWNERSHIP-TRANFERRED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -310,7 +310,7 @@ interface OptionsContractAction {
   timestamp: BigInt!
 }
 
-type VaultOpened implements OptionsContractAction @entity {
+type VaultOpenedAction implements OptionsContractAction @entity {
   " Equals to: <VAULT-OPENED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -330,7 +330,7 @@ type VaultOpened implements OptionsContractAction @entity {
   timestamp: BigInt!
 }
 
-type Exercise implements OptionsContractAction @entity {
+type ExerciseAction implements OptionsContractAction @entity {
   " Equals to: <EXERCISE>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -356,7 +356,7 @@ type Exercise implements OptionsContractAction @entity {
   timestamp: BigInt!
 }
 
-type TransferFee implements OptionsContractAction @entity {
+type TransferFeeAction implements OptionsContractAction @entity {
   " Equals to: <TRANSFER-FEE>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -379,7 +379,7 @@ type TransferFee implements OptionsContractAction @entity {
   timestamp: BigInt!
 }
 
-type OptionsContractOwnershipTransferred implements OptionsContractAction @entity {
+type OptionsContractOwnershipTransferredAction implements OptionsContractAction @entity {
   " Equals to: <OWNERSHIP-TRANFERRED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -402,7 +402,7 @@ type OptionsContractOwnershipTransferred implements OptionsContractAction @entit
   timestamp: BigInt!
 }
 
-type UpdateParameters implements OptionsContractAction @entity {
+type UpdateParametersAction implements OptionsContractAction @entity {
   " Equals to: <UPDATE-PARAMETERS>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -476,7 +476,7 @@ interface VaultAction {
   timestamp: BigInt!
 }
 
-type ETHCollateralAdded implements VaultAction @entity {
+type ETHCollateralAddedAction implements VaultAction @entity {
   " Equals to: <ETH-COLLATERAL-ADDED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -499,7 +499,7 @@ type ETHCollateralAdded implements VaultAction @entity {
   timestamp: BigInt!
 }
 
-type ERC20CollateralAdded implements VaultAction @entity {
+type ERC20CollateralAddedAction implements VaultAction @entity {
   " Equals to: <ERC20-COLLATERAL-ADDED>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -522,7 +522,7 @@ type ERC20CollateralAdded implements VaultAction @entity {
   timestamp: BigInt!
 }
 
-type RemoveCollateral implements VaultAction @entity {
+type RemoveCollateralAction implements VaultAction @entity {
   " Equals to: <REMOVE-COLLATERAL>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -545,7 +545,7 @@ type RemoveCollateral implements VaultAction @entity {
   timestamp: BigInt!
 }
 
-type IssuedOToken implements VaultAction @entity {
+type IssuedOTokenAction implements VaultAction @entity {
   " Equals to: <ISSUED-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -568,7 +568,7 @@ type IssuedOToken implements VaultAction @entity {
   timestamp: BigInt!
 }
 
-type Liquidate implements VaultAction @entity {
+type LiquidateAction implements VaultAction @entity {
   " Equals to: <LIQUIDATE>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -591,7 +591,7 @@ type Liquidate implements VaultAction @entity {
   timestamp: BigInt!
 }
 
-type ClaimedCollateral implements VaultAction @entity {
+type ClaimedCollateralAction implements VaultAction @entity {
   " Equals to: <CLAIMED-COLLATERAL>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -617,7 +617,7 @@ type ClaimedCollateral implements VaultAction @entity {
   timestamp: BigInt!
 }
 
-type BurnOToken implements VaultAction @entity {
+type BurnOTokenAction implements VaultAction @entity {
   " Equals to: <BURN-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -637,7 +637,7 @@ type BurnOToken implements VaultAction @entity {
   timestamp: BigInt!
 }
 
-type TransferVaultOwnership implements VaultAction @entity {
+type TransferVaultOwnershipAction implements VaultAction @entity {
   " Equals to: <TRANSFER-VAULT-OWNERSHIP>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -677,7 +677,7 @@ interface OptionsExchangeAction {
   timestamp: BigInt!
 }
 
-type SellOTokens implements OptionsExchangeAction @entity {
+type SellOTokensAction implements OptionsExchangeAction @entity {
   " Equals to: <SELL-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
 
@@ -706,7 +706,7 @@ type SellOTokens implements OptionsExchangeAction @entity {
   timestamp: BigInt!
 }
 
-type BuyOTokens implements OptionsExchangeAction @entity {
+type BuyOTokensAction implements OptionsExchangeAction @entity {
   " Equals to: <BUY-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
 

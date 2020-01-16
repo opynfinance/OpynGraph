@@ -16,11 +16,11 @@ import { OptionsContract as OptionsContractTemplate } from '../generated/templat
 import {
   OptionsFactory,
   SupportedAsset,
-  AssetAdded,
-  AssetChanged,
-  AssetDeleted,
-  OptionsContractCreated,
-  FactoryOwnershipTransferred,
+  AssetAddedAction,
+  AssetChangedAction,
+  AssetDeletedAction,
+  OptionsContractCreatedAction,
+  FactoryOwnershipTransferredAction,
   OptionsContract,
 } from '../generated/schema'
 
@@ -109,7 +109,7 @@ export function handleOptionsContractCreated(event: OptionsContractCreatedEvent)
 
   let actionId =
     'OPTIONS-CREATED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-  let action = new OptionsContractCreated(actionId)
+  let action = new OptionsContractCreatedAction(actionId)
   action.factory = OPTION_CONTRACT_STATE_KEY
   action.address = optionsAddress
   action.block = event.block.number
@@ -135,7 +135,7 @@ export function handleAssetAdded(event: AssetAddedEvent): void {
 
   let actionId =
     'ASSET-ADDED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-  let action = new AssetAdded(actionId)
+  let action = new AssetAddedAction(actionId)
   action.factory = OPTION_CONTRACT_STATE_KEY
   action.asset = event.params.asset.toHexString()
   action.address = event.params.addr
@@ -161,7 +161,7 @@ export function handleAssetChanged(event: AssetChangedEvent): void {
 
     let actionId =
       'ASSET-CHANGED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-    let action = new AssetChanged(actionId)
+    let action = new AssetChangedAction(actionId)
     action.factory = OPTION_CONTRACT_STATE_KEY
     action.asset = event.params.asset.toHexString()
     action.oldAddress = oldAddress
@@ -191,7 +191,7 @@ export function handleAssetDeleted(event: AssetDeletedEvent): void {
 
     let actionId =
       'ASSET-DELETED-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-    let action = new AssetDeleted(actionId)
+    let action = new AssetDeletedAction(actionId)
     action.factory = OPTION_CONTRACT_STATE_KEY
     action.asset = event.params.asset.toHexString()
     action.address = asset.address
@@ -224,7 +224,7 @@ export function handleOwnershipTransferred(event: OwnershipTransferredEvent): vo
     event.transaction.hash.toHex() +
     '-' +
     event.logIndex.toString()
-  let action = new FactoryOwnershipTransferred(actionId)
+  let action = new FactoryOwnershipTransferredAction(actionId)
   action.factory = OPTION_CONTRACT_STATE_KEY
   action.oldOwner = event.params.previousOwner
   action.newOwner = event.params.newOwner

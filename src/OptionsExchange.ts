@@ -1,11 +1,11 @@
-import { SellOTokens, BuyOTokens } from '../generated/OptionsExchange/OptionsExchange'
-
 import {
-  SellOTokens as SellOTokensAction,
-  BuyOTokens as BuyOTokensAction,
-} from '../generated/schema'
+  SellOTokens as SellOTokensEvent,
+  BuyOTokens as BuyOTokensEvent,
+} from '../generated/OptionsExchange/OptionsExchange'
 
-export function handleSellOTokens(event: SellOTokens): void {
+import { SellOTokensAction, BuyOTokensAction } from '../generated/schema'
+
+export function handleSellOTokens(event: SellOTokensEvent): void {
   let actionId =
     'SELL-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let action = new SellOTokensAction(actionId)
@@ -20,7 +20,7 @@ export function handleSellOTokens(event: SellOTokens): void {
   action.save()
 }
 
-export function handleBuyOTokens(event: BuyOTokens): void {
+export function handleBuyOTokens(event: BuyOTokensEvent): void {
   let actionId =
     'BUY-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let action = new BuyOTokensAction(actionId)

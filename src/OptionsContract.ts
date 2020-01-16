@@ -1,46 +1,46 @@
 import { log, store } from '@graphprotocol/graph-ts'
 
 import {
-  OptionsContract,
-  VaultOpened,
-  OwnershipTransferred,
-  Exercise,
-  ETHCollateralAdded,
-  ERC20CollateralAdded,
-  RemoveCollateral,
-  IssuedOTokens,
-  Liquidate,
-  ClaimedCollateral,
-  BurnOTokens,
-  UpdateParameters,
-  TransferFee,
-  TransferVaultOwnership,
+  OptionsContract as OptionsContractSmartContract,
+  VaultOpened as VaultOpenedEvent,
+  OwnershipTransferred as OwnershipTransferredEvent,
+  Exercise as ExerciseEvent,
+  ETHCollateralAdded as ETHCollateralAddedEvent,
+  ERC20CollateralAdded as ERC20CollateralAddedEvent,
+  RemoveCollateral as RemoveCollateralEvent,
+  IssuedOTokens as IssuedOTokensEvent,
+  Liquidate as LiquidateEvent,
+  ClaimedCollateral as ClaimedCollateralEvent,
+  BurnOTokens as BurnOTokensEvent,
+  UpdateParameters as UpdateParametersEvent,
+  TransferFee as TransferFeeEvent,
+  TransferVaultOwnership as TransferVaultOwnershipEvent,
 } from '../generated/templates/OptionsContract/OptionsContract'
 
 import {
-  OptionsContract as OptionsContractState,
+  OptionsContract,
   Vault,
-  VaultOpened as VaultOpenedAction,
-  Exercise as ExerciseAction,
-  OptionsContractOwnershipTransferred,
-  ETHCollateralAdded as ETHCollateralAddedAction,
-  ERC20CollateralAdded as ERC20CollateralAddedAction,
-  RemoveCollateral as RemoveCollateralAction,
-  IssuedOToken as IssuedOTokensAction,
-  Liquidate as LiquidateAction,
-  ClaimedCollateral as ClaimedCollateralAction,
-  BurnOToken as BurnOTokensAction,
-  UpdateParameters as UpdateParametersAction,
-  TransferFee as TransferFeeAction,
-  TransferVaultOwnership as TransferVaultOwnershipAction,
+  VaultOpenedAction,
+  ExerciseAction,
+  OptionsContractOwnershipTransferredAction,
+  ETHCollateralAddedAction,
+  ERC20CollateralAddedAction,
+  RemoveCollateralAction,
+  IssuedOTokenAction,
+  LiquidateAction,
+  ClaimedCollateralAction,
+  BurnOTokenAction,
+  UpdateParametersAction,
+  TransferFeeAction,
+  TransferVaultOwnershipAction,
 } from '../generated/schema'
 import { BIGINT_ZERO } from './helpers'
 
 // Option related events
 
-export function handleVaultOpened(event: VaultOpened): void {
+export function handleVaultOpened(event: VaultOpenedEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
@@ -67,9 +67,9 @@ export function handleVaultOpened(event: VaultOpened): void {
   }
 }
 
-export function handleExercise(event: Exercise): void {
+export function handleExercise(event: ExerciseEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     optionsContract.totalExercised = optionsContract.totalExercised.plus(
@@ -99,10 +99,10 @@ export function handleExercise(event: Exercise): void {
 }
 
 export function handleOptionsContractOwnershipTransferred(
-  event: OwnershipTransferred,
+  event: OwnershipTransferredEvent,
 ): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     optionsContract.owner = event.params.newOwner
@@ -113,7 +113,7 @@ export function handleOptionsContractOwnershipTransferred(
       event.transaction.hash.toHex() +
       '-' +
       event.logIndex.toString()
-    let action = new OptionsContractOwnershipTransferred(actionId)
+    let action = new OptionsContractOwnershipTransferredAction(actionId)
     action.optionsContract = optionsContractId
     action.oldOwner = event.params.previousOwner
     action.newOwner = event.params.newOwner
@@ -128,9 +128,9 @@ export function handleOptionsContractOwnershipTransferred(
   }
 }
 
-export function handleUpdateParameters(event: UpdateParameters): void {
+export function handleUpdateParameters(event: UpdateParametersEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     optionsContract.liquidationIncentiveValue = event.params.liquidationIncentive
@@ -165,9 +165,9 @@ export function handleUpdateParameters(event: UpdateParameters): void {
   }
 }
 
-export function handleTransferFee(event: TransferFee): void {
+export function handleTransferFee(event: TransferFeeEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     optionsContract.totalCollateral = optionsContract.totalCollateral.minus(
@@ -194,9 +194,9 @@ export function handleTransferFee(event: TransferFee): void {
 
 // Vault related events
 
-export function handleETHCollateralAdded(event: ETHCollateralAdded): void {
+export function handleETHCollateralAdded(event: ETHCollateralAddedEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     // add totalCollateral
@@ -235,9 +235,9 @@ export function handleETHCollateralAdded(event: ETHCollateralAdded): void {
   }
 }
 
-export function handleERC20CollateralAdded(event: ERC20CollateralAdded): void {
+export function handleERC20CollateralAdded(event: ERC20CollateralAddedEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     // add totalCollateral
@@ -276,9 +276,9 @@ export function handleERC20CollateralAdded(event: ERC20CollateralAdded): void {
   }
 }
 
-export function handleRemoveCollateral(event: RemoveCollateral): void {
+export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     // add totalCollateral
@@ -317,7 +317,7 @@ export function handleRemoveCollateral(event: RemoveCollateral): void {
   }
 }
 
-export function handleIssuedOTokens(event: IssuedOTokens): void {
+export function handleIssuedOTokens(event: IssuedOTokensEvent): void {
   let optionsContractId = event.address.toHexString()
 
   // add putsOutstanding to vault
@@ -329,7 +329,7 @@ export function handleIssuedOTokens(event: IssuedOTokens): void {
 
     let actionId =
       'ISSUED-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-    let action = new IssuedOTokensAction(actionId)
+    let action = new IssuedOTokenAction(actionId)
     action.vault = vaultId
     action.amount = event.params.oTokensIssued
     action.issuedTo = event.params.issuedTo
@@ -342,7 +342,7 @@ export function handleIssuedOTokens(event: IssuedOTokens): void {
   }
 }
 
-export function handleBurnOTokens(event: BurnOTokens): void {
+export function handleBurnOTokens(event: BurnOTokensEvent): void {
   let optionsContractId = event.address.toHexString()
 
   // remove putsOutstanding to vault
@@ -354,7 +354,7 @@ export function handleBurnOTokens(event: BurnOTokens): void {
 
     let actionId =
       'BURN-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-    let action = new BurnOTokensAction(actionId)
+    let action = new BurnOTokenAction(actionId)
     action.vault = vaultId
     action.burned = event.params.oTokensBurned
     action.block = event.block.number
@@ -366,9 +366,9 @@ export function handleBurnOTokens(event: BurnOTokens): void {
   }
 }
 
-export function handleLiquidate(event: Liquidate): void {
+export function handleLiquidate(event: LiquidateEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     // uptate totalLiquidated an totalCollateral
@@ -384,10 +384,10 @@ export function handleLiquidate(event: Liquidate): void {
     let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
     let vault = Vault.load(vaultId)
     if (vault !== null) {
-      let optionsContract = OptionsContract.bind(event.address)
-      let vaultNewState = optionsContract.getVault(event.params.vaultOwner)
-      vault.collateral = vaultNewState.value0
-      vault.oTokensIssued = vaultNewState.value1
+      let optionsContract = OptionsContractSmartContract.bind(event.address)
+      let vaultNew = optionsContract.getVault(event.params.vaultOwner)
+      vault.collateral = vaultNew.value0
+      vault.oTokensIssued = vaultNew.value1
       vault.save()
 
       let actionId =
@@ -410,9 +410,9 @@ export function handleLiquidate(event: Liquidate): void {
   }
 }
 
-export function handleClaimedCollateral(event: ClaimedCollateral): void {
+export function handleClaimedCollateral(event: ClaimedCollateralEvent): void {
   let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContractState.load(optionsContractId)
+  let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     // uptate totalUnderlying an totalCollateral
@@ -428,10 +428,10 @@ export function handleClaimedCollateral(event: ClaimedCollateral): void {
     let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
     let vault = Vault.load(vaultId)
     if (vault !== null) {
-      let optionsContract = OptionsContract.bind(event.address)
-      let vaultNewState = optionsContract.getVault(event.params.vaultOwner)
-      vault.collateral = vaultNewState.value0
-      vault.oTokensIssued = vaultNewState.value1
+      let optionsContract = OptionsContractSmartContract.bind(event.address)
+      let vaultNew = optionsContract.getVault(event.params.vaultOwner)
+      vault.collateral = vaultNew.value0
+      vault.oTokensIssued = vaultNew.value1
       vault.save()
 
       let actionId =
@@ -458,7 +458,7 @@ export function handleClaimedCollateral(event: ClaimedCollateral): void {
   }
 }
 
-export function handleTransferVaultOwnership(event: TransferVaultOwnership): void {
+export function handleTransferVaultOwnership(event: TransferVaultOwnershipEvent): void {
   let vaultId = event.address.toHexString() + '-' + event.params.oldOwner.toString()
   let vault = Vault.load(vaultId)
 
