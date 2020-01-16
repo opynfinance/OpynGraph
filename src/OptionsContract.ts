@@ -250,6 +250,10 @@ export function handleETHCollateralAdded(event: ETHCollateralAddedEvent): void {
       action.transactionHash = event.transaction.hash
       action.timestamp = event.block.timestamp
       action.save()
+
+      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+      vault.ethCollateralAddedCount = vault.ethCollateralAddedCount.plus(BIGINT_ONE)
+      vault.save()
     } else {
       log.warning('handleETHCollateralAdded: No Vault with id {} found.', [vaultId])
     }
@@ -291,6 +295,10 @@ export function handleERC20CollateralAdded(event: ERC20CollateralAddedEvent): vo
       action.transactionHash = event.transaction.hash
       action.timestamp = event.block.timestamp
       action.save()
+
+      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+      vault.erc20CollateralAddedCount = vault.erc20CollateralAddedCount.plus(BIGINT_ONE)
+      vault.save()
     } else {
       log.warning('handleERC20CollateralAdded: No Vault with id {} found.', [vaultId])
     }
@@ -332,6 +340,10 @@ export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
       action.transactionHash = event.transaction.hash
       action.timestamp = event.block.timestamp
       action.save()
+
+      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+      vault.removeCollateralCount = vault.removeCollateralCount.plus(BIGINT_ONE)
+      vault.save()
     } else {
       log.warning('handleRemoveCollateral: No Vault with id {} found.', [vaultId])
     }
@@ -362,6 +374,10 @@ export function handleIssuedOTokens(event: IssuedOTokensEvent): void {
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+    vault.issuedOTokenCount = vault.issuedOTokenCount.plus(BIGINT_ONE)
+    vault.save()
   } else {
     log.warning('handleIssuedOTokens: No Vault with id {} found.', [vaultId])
   }
@@ -386,6 +402,10 @@ export function handleBurnOTokens(event: BurnOTokensEvent): void {
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+    vault.burnOTokenCount = vault.burnOTokenCount.plus(BIGINT_ONE)
+    vault.save()
   } else {
     log.warning('handleBurnOTokens: No Vault with id {} found.', [vaultId])
   }
@@ -425,6 +445,10 @@ export function handleLiquidate(event: LiquidateEvent): void {
       action.transactionHash = event.transaction.hash
       action.timestamp = event.block.timestamp
       action.save()
+
+      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+      vault.liquidateCount = vault.liquidateCount.plus(BIGINT_ONE)
+      vault.save()
     } else {
       log.warning('handleLiquidate: No Vault with id {} found.', [vaultId])
     }
@@ -473,6 +497,10 @@ export function handleClaimedCollateral(event: ClaimedCollateralEvent): void {
       action.transactionHash = event.transaction.hash
       action.timestamp = event.block.timestamp
       action.save()
+
+      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+      vault.claimedCollateralCount = vault.claimedCollateralCount.plus(BIGINT_ONE)
+      vault.save()
     } else {
       log.warning('handleClaimedCollateral: No Vault with id {} found.', [vaultId])
     }
@@ -514,6 +542,10 @@ export function handleTransferVaultOwnership(event: TransferVaultOwnershipEvent)
     action.transactionHash = event.transaction.hash
     action.timestamp = event.block.timestamp
     action.save()
+
+    vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+    vault.transferVaultOwnershipCount = vault.transferVaultOwnershipCount.plus(BIGINT_ONE)
+    vault.save()
   } else {
     log.warning('handleTransferVaultOwnership: No Vault with id {} found.', [vaultId])
   }

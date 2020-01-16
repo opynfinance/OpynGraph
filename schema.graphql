@@ -472,6 +472,33 @@ type Vault @entity {
   collateral: BigInt!
 
   actions: [VaultAction!] @derivedFrom(field: "vault")
+
+  " Total number of actions (all types)"
+  actionCount: BigInt!
+
+  " Total number of ethCollateralAddedAction actions "
+  ethCollateralAddedCount: BigInt!
+
+  " Total number of erc20CollateralAdded actions "
+  erc20CollateralAddedCount: BigInt!
+
+  " Total number of removeCollateral actions "
+  removeCollateralCount: BigInt!
+
+  " Total number of issuedOToken actions "
+  issuedOTokenCount: BigInt!
+
+  " Total number of liquidate actions "
+  liquidateCount: BigInt!
+
+  " Total number of claimedCollateral actions "
+  claimedCollateralCount: BigInt!
+
+  " Total number of burnOToken actions "
+  burnOTokenCount: BigInt!
+
+  " Total number of transferVaultOwnership actions "
+  transferVaultOwnershipCount: BigInt!
 }
 
 #
