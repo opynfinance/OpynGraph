@@ -99,10 +99,10 @@ export function handleOptionsContractCreated(event: OptionsContractCreated): voi
   optionsContract.burnEventCount = BIGINT_ZERO
   optionsContract.mintEventCount = BIGINT_ZERO
   optionsContract.transferEventCount = BIGINT_ZERO
-  optionsContract.totalSupply = BIGINT_ZERO.toBigDecimal()
-  optionsContract.totalBurned = BIGINT_ZERO.toBigDecimal()
-  optionsContract.totalMinted = BIGINT_ZERO.toBigDecimal()
-  optionsContract.totalTransferred = BIGINT_ZERO.toBigDecimal()
+  optionsContract.totalSupply = BIGINT_ZERO
+  optionsContract.totalBurned = BIGINT_ZERO
+  optionsContract.totalMinted = BIGINT_ZERO
+  optionsContract.totalTransferred = BIGINT_ZERO
 
   optionsContract.save()
 }

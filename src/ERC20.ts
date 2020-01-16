@@ -1,4 +1,4 @@
-import { BigDecimal, Bytes, EthereumEvent } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, Bytes, EthereumEvent } from '@graphprotocol/graph-ts'
 
 import { Transfer } from '../generated/templates/OptionsContract/OptionsContract'
 import { BurnEvent, MintEvent, OptionsContract, TransferEvent } from '../generated/schema'
@@ -17,7 +17,8 @@ export function handleERC20Transfer(event: Transfer): void {
   let token = OptionsContract.load(event.address.toHex())
 
   if (token != null) {
-    let amount = toDecimal(event.params.value, 18)
+    // let amount = toDecimal(event.params.value, token.oTokenExchangeRateExp.times(BigInt.fromI32(-1)).toI32())
+    let amount = event.params.value
 
     let isBurn = event.params.to.toHex() == GENESIS_ADDRESS
     let isMint = event.params.from.toHex() == GENESIS_ADDRESS
@@ -85,7 +86,8 @@ export function handleBurn(event: Transfer): void {
   let token = OptionsContract.load(event.address.toHex())
 
   if (token != null) {
-    let amount = toDecimal(event.params.value, 18)
+    // let amount = toDecimal(event.params.value, token.oTokenExchangeRateExp.times(BigInt.fromI32(-1)).toI32())
+    let amount = event.params.value
 
     // Persist burn event log
     let eventEntity = handleBurnEvent(token, amount, event.params.from, event)
@@ -107,7 +109,8 @@ export function handleMint(event: Transfer): void {
   let token = OptionsContract.load(event.address.toHex())
 
   if (token != null) {
-    let amount = toDecimal(event.params.value, 18)
+    // let amount = toDecimal(event.params.value, token.oTokenExchangeRateExp.times(BigInt.fromI32(-1)).toI32())
+    let amount = event.params.value
 
     // Persist mint event log
     let eventEntity = handleMintEvent(token, amount, event.params.to, event)
@@ -127,7 +130,7 @@ export function handleMint(event: Transfer): void {
 
 function handleBurnEvent(
   token: OptionsContract | null,
-  amount: BigDecimal,
+  amount: BigInt,
   burner: Bytes,
   event: EthereumEvent,
 ): BurnEvent {
@@ -159,7 +162,7 @@ function handleBurnEvent(
 
 function handleMintEvent(
   token: OptionsContract | null,
-  amount: BigDecimal,
+  amount: BigInt,
   destination: Bytes,
   event: EthereumEvent,
 ): MintEvent {
@@ -193,7 +196,7 @@ function handleMintEvent(
 
 function handleTransferEvent(
   token: OptionsContract | null,
-  amount: BigDecimal,
+  amount: BigInt,
   source: Bytes,
   destination: Bytes,
   event: EthereumEvent,

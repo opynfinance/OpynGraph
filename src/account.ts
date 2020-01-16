@@ -1,4 +1,4 @@
-import { BigDecimal, Bytes, EthereumEvent } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, Bytes, EthereumEvent } from '@graphprotocol/graph-ts'
 
 import { Account, AccountBalance, OptionsContract } from '../generated/schema'
 
@@ -32,7 +32,7 @@ function getOrCreateAccountBalance(
   let newBalance = new AccountBalance(balanceId)
   newBalance.account = account.id
   newBalance.token = token.id
-  newBalance.amount = BIGINT_ZERO.toBigDecimal()
+  newBalance.amount = BIGINT_ZERO
 
   return newBalance
 }
@@ -40,7 +40,7 @@ function getOrCreateAccountBalance(
 export function increaseAccountBalance(
   account: Account,
   token: OptionsContract,
-  amount: BigDecimal,
+  amount: BigInt,
 ): AccountBalance {
   let balance = getOrCreateAccountBalance(account, token)
   balance.amount = balance.amount.plus(amount)
@@ -51,7 +51,7 @@ export function increaseAccountBalance(
 export function decreaseAccountBalance(
   account: Account,
   token: OptionsContract,
-  amount: BigDecimal,
+  amount: BigInt,
 ): AccountBalance {
   let balance = getOrCreateAccountBalance(account, token)
   balance.amount = balance.amount.minus(amount)
