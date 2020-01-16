@@ -37,6 +37,13 @@ export function getOptionsFactory(address: Address): OptionsFactory {
 
     state.optionsExchangeAddress = storage.optionsExchange()
     state.owner = storage.owner()
+    state.actionCount = BIGINT_ZERO
+    state.optionsContractCreatedCount = BIGINT_ZERO
+    state.assetAddedCount = BIGINT_ZERO
+    state.assetChangedCount = BIGINT_ZERO
+    state.assetDeletedCount = BIGINT_ZERO
+    state.factoryOwnershipTransferredCount = BIGINT_ZERO
+
     state.save()
   }
 
@@ -104,6 +111,13 @@ export function handleOptionsContractCreated(event: OptionsContractCreatedEvent)
   optionsContract.totalBurned = BIGINT_ZERO
   optionsContract.totalMinted = BIGINT_ZERO
   optionsContract.totalTransferred = BIGINT_ZERO
+
+  optionsContract.actionCount = BIGINT_ZERO
+  optionsContract.vaultOpenedCount = BIGINT_ZERO
+  optionsContract.exerciseCount = BIGINT_ZERO
+  optionsContract.transferFeeCount = BIGINT_ZERO
+  optionsContract.optionsContractOwnershipTransferredCount = BIGINT_ZERO
+  optionsContract.updateParametersCount = BIGINT_ZERO
 
   optionsContract.save()
 

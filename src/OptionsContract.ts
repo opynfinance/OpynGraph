@@ -44,12 +44,24 @@ export function handleVaultOpened(event: VaultOpenedEvent): void {
   let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
-    let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
+    let vaultId =
+      optionsContractId +
+      '-VAULT-' +
+      optionsContract.vaultOpenedCount.plus(BIGINT_ONE).toString()
     let vault = new Vault(vaultId)
     vault.owner = event.params.vaultOwner
     vault.optionsContract = optionsContractId
     vault.oTokensIssued = BIGINT_ZERO
     vault.collateral = BIGINT_ZERO
+    vault.actionCount = BIGINT_ZERO
+    vault.ethCollateralAddedCount = BIGINT_ZERO
+    vault.erc20CollateralAddedCount = BIGINT_ZERO
+    vault.removeCollateralCount = BIGINT_ZERO
+    vault.issuedOTokenCount = BIGINT_ZERO
+    vault.liquidateCount = BIGINT_ZERO
+    vault.claimedCollateralCount = BIGINT_ZERO
+    vault.burnOTokenCount = BIGINT_ZERO
+    vault.transferVaultOwnershipCount = BIGINT_ZERO
     vault.save()
 
     let actionId =
@@ -518,16 +530,6 @@ export function handleTransferVaultOwnership(event: TransferVaultOwnershipEvent)
   if (vault !== null) {
     vault.owner = event.params.newOwner
     vault.save()
-
-    let newVaultId = event.address.toHexString() + '-' + event.params.newOwner.toString()
-    let newOwnerVault = new Vault(newVaultId)
-    newOwnerVault.owner = event.params.newOwner
-    newOwnerVault.optionsContract = event.address.toHexString()
-    newOwnerVault.oTokensIssued = vault.oTokensIssued
-    newOwnerVault.collateral = vault.collateral
-    newOwnerVault.save()
-
-    store.remove('Vault', vaultId)
 
     let actionId =
       'OWNERSHIP-TRANFERRED-' +
