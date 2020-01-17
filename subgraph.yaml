@@ -106,3 +106,21 @@ templates:
           handler: handleOptionsContractOwnershipTransferred
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleERC20Transfer
+  - name: ApprovalToken
+    kind: ethereum/contract
+    network: rinkeby
+    source:
+      abi: ApprovalToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - Approval
+      abis:
+        - name: ApprovalToken
+          file: ./abis/Approval.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval

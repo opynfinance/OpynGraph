@@ -44,11 +44,9 @@ export function handleVaultOpened(event: VaultOpenedEvent): void {
   let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
-    let vaultId =
-      optionsContractId +
-      '-VAULT-' +
-      optionsContract.vaultOpenedCount.plus(BIGINT_ONE).toString()
+    let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
     let vault = new Vault(vaultId)
+
     vault.owner = event.params.vaultOwner
     vault.optionsContract = optionsContractId
     vault.oTokensIssued = BIGINT_ZERO

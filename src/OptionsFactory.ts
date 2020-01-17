@@ -1,5 +1,5 @@
 import { Address, BigInt, log, store } from '@graphprotocol/graph-ts'
-
+import { DAI, USDC } from './constants'
 import {
   OptionsFactory as OptionsFactoryEvent,
   OptionsContractCreated as OptionsContractCreatedEvent,
@@ -11,7 +11,10 @@ import {
 
 import { OptionsContract as OptionsContractSmartContract } from '../generated/OptionsFactory/OptionsContract'
 
-import { OptionsContract as OptionsContractTemplate } from '../generated/templates'
+import {
+  OptionsContract as OptionsContractTemplate,
+  ApprovalToken as ApprovalTokenTemplate,
+} from '../generated/templates'
 
 import {
   OptionsFactory,
@@ -45,6 +48,12 @@ export function getOptionsFactory(address: Address): OptionsFactory {
     state.factoryOwnershipTransferredCount = BIGINT_ZERO
 
     state.save()
+
+    // Start traking the DAI approval
+    ApprovalTokenTemplate.create(Address.fromString(DAI))
+
+    // Start traking the USDC approval
+    ApprovalTokenTemplate.create(Address.fromString(USDC))
   }
 
   return state as OptionsFactory

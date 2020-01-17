@@ -758,7 +758,7 @@ type BuyOTokensAction implements OptionsExchangeAction @entity {
   " Buyer address "
   buyer: Bytes!
 
-  " he address to send the oTokens back to "
+  " The address to send the oTokens back to "
   receiver: Bytes!
 
   " The address of the oToken to buy "
@@ -913,4 +913,38 @@ type AccountBalance @entity {
 
   " Hash of the last transaction that modified the balance "
   transaction: Bytes
+}
+
+#
+# Approvals
+#
+enum AllowedToken {
+  DAI
+  USDC
+}
+
+type Approval @entity {
+  " Equals to: <ApprovedToken>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Approved token symbol "
+  approvedToken: AllowedToken!
+
+  " Approved token address "
+  approvedTokenAddress: Bytes!
+
+  " Approver address "
+  owner: Bytes!
+
+  " New allowance "
+  value: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Timestamp as seconds (time) "
+  timestamp: BigInt!
 }
