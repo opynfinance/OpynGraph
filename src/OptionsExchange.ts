@@ -11,7 +11,7 @@ export function handleSellOTokens(event: SellOTokensEvent): void {
   let action = new SellOTokensAction(actionId)
   action.seller = event.params.seller
   action.receiver = event.params.receiver
-  action.oTokenAddress = event.params.oTokenAddress
+  action.token = event.params.oTokenAddress.toHexString()
   action.payoutTokenAddress = event.params.payoutTokenAddress
   action.oTokensToSell = event.params.oTokensToSell
   action.block = event.block.number
@@ -26,7 +26,7 @@ export function handleBuyOTokens(event: BuyOTokensEvent): void {
   let action = new BuyOTokensAction(actionId)
   action.buyer = event.params.buyer
   action.receiver = event.params.receiver
-  action.oTokenAddress = event.params.oTokenAddress
+  action.token = event.params.oTokenAddress.toHexString()
   action.paymentTokenAddress = event.params.paymentTokenAddress
   action.oTokensToBuy = event.params.oTokensToBuy
   action.block = event.block.number

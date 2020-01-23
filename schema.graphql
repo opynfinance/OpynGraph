@@ -306,6 +306,8 @@ type OptionsContract @entity {
 
   " List of token events "
   events: [TokenEvent!]! @derivedFrom(field: "token")
+
+  holdersBalances: [AccountBalance!] @derivedFrom(field: "token")
 }
 
 #
@@ -732,8 +734,8 @@ type SellOTokensAction implements OptionsExchangeAction @entity {
   " The address to send the payout tokens back to "
   receiver: Bytes!
 
-  " The address of the oToken to sell "
-  oTokenAddress: Bytes!
+  " oToken to sell "
+  token: OptionsContract!
 
   " The address of the token to receive the premiums in "
   payoutTokenAddress: Bytes!
@@ -761,8 +763,8 @@ type BuyOTokensAction implements OptionsExchangeAction @entity {
   " The address to send the oTokens back to "
   receiver: Bytes!
 
-  " The address of the oToken to buy "
-  oTokenAddress: Bytes!
+  " oToken to buy "
+  token: OptionsContract!
 
   " The address of the token to pay the premiums in "
   paymentTokenAddress: Bytes!
