@@ -8,13 +8,13 @@ import {
   ETHCollateralAdded as ETHCollateralAddedEvent,
   ERC20CollateralAdded as ERC20CollateralAddedEvent,
   RemoveCollateral as RemoveCollateralEvent,
+  RemoveUnderlying as RemoveUnderlyingEvent,
   IssuedOTokens as IssuedOTokensEvent,
   Liquidate as LiquidateEvent,
-  ClaimedCollateral as ClaimedCollateralEvent,
+  RedeemVaultBalance as RedeemVaultBalanceEvent,
   BurnOTokens as BurnOTokensEvent,
   UpdateParameters as UpdateParametersEvent,
   TransferFee as TransferFeeEvent,
-  TransferVaultOwnership as TransferVaultOwnershipEvent,
 } from '../generated/templates/OptionsContract/OptionsContract'
 
 import {
@@ -26,13 +26,13 @@ import {
   ETHCollateralAddedAction,
   ERC20CollateralAddedAction,
   RemoveCollateralAction,
+  RemoveUnderlyingAction,
   IssuedOTokenAction,
   LiquidateAction,
-  ClaimedCollateralAction,
+  RedeemVaultBalanceAction,
   BurnOTokenAction,
   UpdateParametersAction,
   TransferFeeAction,
-  TransferVaultOwnershipAction,
 } from '../generated/schema'
 
 import { BIGINT_ZERO, BIGINT_ONE } from './helpers'
@@ -51,15 +51,17 @@ export function handleVaultOpened(event: VaultOpenedEvent): void {
     vault.optionsContract = optionsContractId
     vault.oTokensIssued = BIGINT_ZERO
     vault.collateral = BIGINT_ZERO
+    vault.underlying = BIGINT_ZERO
     vault.actionCount = BIGINT_ZERO
+    vault.exerciseCount = BIGINT_ZERO
     vault.ethCollateralAddedCount = BIGINT_ZERO
     vault.erc20CollateralAddedCount = BIGINT_ZERO
     vault.removeCollateralCount = BIGINT_ZERO
+    vault.removeUnderlyingCount = BIGINT_ZERO
     vault.issuedOTokenCount = BIGINT_ZERO
     vault.liquidateCount = BIGINT_ZERO
-    vault.claimedCollateralCount = BIGINT_ZERO
+    vault.redeemVaultBalanceActionCount = BIGINT_ZERO
     vault.burnOTokenCount = BIGINT_ZERO
-    vault.transferVaultOwnershipCount = BIGINT_ZERO
     vault.save()
 
     let actionId =
@@ -77,41 +79,6 @@ export function handleVaultOpened(event: VaultOpenedEvent): void {
     optionsContract.save()
   } else {
     log.warning('handleVaultOpened: No OptionsContract with id {} found.', [
-      optionsContractId,
-    ])
-  }
-}
-
-export function handleExercise(event: ExerciseEvent): void {
-  let optionsContractId = event.address.toHexString()
-  let optionsContract = OptionsContract.load(optionsContractId)
-
-  if (optionsContract !== null) {
-    optionsContract.totalExercised = optionsContract.totalExercised.plus(
-      event.params.amtCollateralToPay,
-    )
-    optionsContract.totalUnderlying = optionsContract.totalUnderlying.plus(
-      event.params.amtUnderlyingToPay,
-    )
-    optionsContract.save()
-
-    let actionId =
-      'EXERCISE-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-    let action = new ExerciseAction(actionId)
-    action.optionsContract = optionsContractId
-    action.exerciser = event.params.exerciser
-    action.amtUnderlyingToPay = event.params.amtUnderlyingToPay
-    action.amtCollateralToPay = event.params.amtCollateralToPay
-    action.block = event.block.number
-    action.transactionHash = event.transaction.hash
-    action.timestamp = event.block.timestamp
-    action.save()
-
-    optionsContract.actionCount = optionsContract.actionCount.plus(BIGINT_ONE)
-    optionsContract.exerciseCount = optionsContract.exerciseCount.plus(BIGINT_ONE)
-    optionsContract.save()
-  } else {
-    log.warning('handleExercise: No OptionsContract with id {} found.', [
       optionsContractId,
     ])
   }
@@ -161,7 +128,6 @@ export function handleUpdateParameters(event: UpdateParametersEvent): void {
     optionsContract.liquidationIncentiveValue = event.params.liquidationIncentive
     optionsContract.transactionFeeValue = event.params.transactionFee
     optionsContract.liquidationFactorValue = event.params.liquidationFactor
-    optionsContract.liquidationFeeValue = event.params.liquidationFee
     optionsContract.minCollateralizationRatioValue =
       event.params.minCollateralizationRatio
     optionsContract.save()
@@ -176,7 +142,6 @@ export function handleUpdateParameters(event: UpdateParametersEvent): void {
     action.liquidationIncentive = event.params.liquidationIncentive
     action.transactionFee = event.params.transactionFee
     action.liquidationFactor = event.params.liquidationFactor
-    action.liquidationFee = event.params.liquidationFee
     action.minCollateralizationRatio = event.params.minCollateralizationRatio
     action.owner = event.params.owner
     action.block = event.block.number
@@ -228,6 +193,50 @@ export function handleTransferFee(event: TransferFeeEvent): void {
 }
 
 // Vault related events
+
+export function handleExercise(event: ExerciseEvent): void {
+  let optionsContractId = event.address.toHexString()
+  let optionsContract = OptionsContract.load(optionsContractId)
+
+  if (optionsContract !== null) {
+    optionsContract.totalExercised = optionsContract.totalExercised.plus(
+      event.params.amtCollateralToPay,
+    )
+    optionsContract.totalUnderlying = optionsContract.totalUnderlying.plus(
+      event.params.amtUnderlyingToPay,
+    )
+    optionsContract.save()
+
+    let vaultId = optionsContractId + '-' + event.params.vaultExercisedFrom.toHexString()
+    let vault = Vault.load(vaultId)
+    if (vault !== null) {
+      vault.collateral = vault.collateral.minus(event.params.amtCollateralToPay)
+      vault.underlying = vault.underlying.plus(event.params.amtUnderlyingToPay)
+      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+      vault.exerciseCount = vault.exerciseCount.plus(BIGINT_ONE)
+      vault.save()
+
+      let actionId =
+        'EXERCISE-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+      let action = new ExerciseAction(vaultId)
+      action.vault = optionsContractId
+      action.exerciser = event.params.exerciser
+      action.vaultExercisedFrom = event.params.vaultExercisedFrom
+      action.amtUnderlyingToPay = event.params.amtUnderlyingToPay
+      action.amtCollateralToPay = event.params.amtCollateralToPay
+      action.block = event.block.number
+      action.transactionHash = event.transaction.hash
+      action.timestamp = event.block.timestamp
+      action.save()
+    } else {
+      log.warning('handleExercise: No Vault with id {} found.', [vaultId])
+    }
+  } else {
+    log.warning('handleExercise: No OptionsContract with id {} found.', [
+      optionsContractId,
+    ])
+  }
+}
 
 export function handleETHCollateralAdded(event: ETHCollateralAddedEvent): void {
   let optionsContractId = event.address.toHexString()
@@ -364,6 +373,51 @@ export function handleRemoveCollateral(event: RemoveCollateralEvent): void {
   }
 }
 
+export function handleRemoveUnderlying(event: RemoveUnderlyingEvent): void {
+  let optionsContractId = event.address.toHexString()
+  let optionsContract = OptionsContract.load(optionsContractId)
+
+  if (optionsContract !== null) {
+    // add totalCollateral
+    optionsContract.totalUnderlying = optionsContract.totalUnderlying.minus(
+      event.params.amountUnderlying,
+    )
+    optionsContract.save()
+
+    // add collateral to vault
+    let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
+    let vault = Vault.load(vaultId)
+    if (vault !== null) {
+      vault.underlying = vault.collateral.minus(event.params.amountUnderlying)
+      vault.save()
+
+      let actionId =
+        'REMOVE-UNDERLYING-' +
+        event.transaction.hash.toHex() +
+        '-' +
+        event.logIndex.toString()
+      let action = new RemoveCollateralAction(actionId)
+      action.vault = vaultId
+      action.amount = event.params.amountUnderlying
+      action.owner = event.params.vaultOwner
+      action.block = event.block.number
+      action.transactionHash = event.transaction.hash
+      action.timestamp = event.block.timestamp
+      action.save()
+
+      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+      vault.removeCollateralCount = vault.removeCollateralCount.plus(BIGINT_ONE)
+      vault.save()
+    } else {
+      log.warning('handleRemoveUnderlying: No Vault with id {} found.', [vaultId])
+    }
+  } else {
+    log.warning('handleRemoveUnderlying: No OptionsContract with id {} found.', [
+      optionsContractId,
+    ])
+  }
+}
+
 export function handleIssuedOTokens(event: IssuedOTokensEvent): void {
   let optionsContractId = event.address.toHexString()
 
@@ -469,17 +523,17 @@ export function handleLiquidate(event: LiquidateEvent): void {
   }
 }
 
-export function handleClaimedCollateral(event: ClaimedCollateralEvent): void {
+export function handleRedeemVaultBalance(event: RedeemVaultBalanceEvent): void {
   let optionsContractId = event.address.toHexString()
   let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract !== null) {
     // uptate totalUnderlying an totalCollateral
     optionsContract.totalCollateral = optionsContract.totalCollateral.minus(
-      event.params.amtCollateralClaimed,
+      event.params.amtCollateralRedeemed,
     )
     optionsContract.totalUnderlying = optionsContract.totalUnderlying.minus(
-      event.params.amtUnderlyingClaimed,
+      event.params.amtUnderlyingRedeemed,
     )
     optionsContract.save()
 
@@ -491,25 +545,28 @@ export function handleClaimedCollateral(event: ClaimedCollateralEvent): void {
       let vaultNew = optionsContract.getVault(event.params.vaultOwner)
       vault.collateral = vaultNew.value0
       vault.oTokensIssued = vaultNew.value1
+      vault.underlying = vaultNew.value2
       vault.save()
 
       let actionId =
-        'CLAIMED-COLLATERAL-' +
+        'REDEEM-VAULT-BALANCE-' +
         event.transaction.hash.toHex() +
         '-' +
         event.logIndex.toString()
-      let action = new ClaimedCollateralAction(actionId)
+      let action = new RedeemVaultBalanceAction(actionId)
       action.vault = vaultId
-      action.collateralClaimed = event.params.amtCollateralClaimed
-      action.underlyingClaimed = event.params.amtUnderlyingClaimed
-      action.claimedBy = event.params.vaultOwner
+      action.collateralRedeemed = event.params.amtCollateralRedeemed
+      action.underlyingRedeemed = event.params.amtUnderlyingRedeemed
+      action.redeemedBy = event.params.vaultOwner
       action.block = event.block.number
       action.transactionHash = event.transaction.hash
       action.timestamp = event.block.timestamp
       action.save()
 
       vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
-      vault.claimedCollateralCount = vault.claimedCollateralCount.plus(BIGINT_ONE)
+      vault.redeemVaultBalanceActionCount = vault.redeemVaultBalanceActionCount.plus(
+        BIGINT_ONE,
+      )
       vault.save()
     } else {
       log.warning('handleClaimedCollateral: No Vault with id {} found.', [vaultId])
@@ -518,35 +575,5 @@ export function handleClaimedCollateral(event: ClaimedCollateralEvent): void {
     log.warning('handleClaimedCollateral: No OptionsContract with id {} found.', [
       optionsContractId,
     ])
-  }
-}
-
-export function handleTransferVaultOwnership(event: TransferVaultOwnershipEvent): void {
-  let vaultId = event.address.toHexString() + '-' + event.params.oldOwner.toString()
-  let vault = Vault.load(vaultId)
-
-  if (vault !== null) {
-    vault.owner = event.params.newOwner
-    vault.save()
-
-    let actionId =
-      'OWNERSHIP-TRANFERRED-' +
-      event.transaction.hash.toHex() +
-      '-' +
-      event.logIndex.toString()
-    let action = new TransferVaultOwnershipAction(actionId)
-    action.vault = vaultId
-    action.oldOwner = event.params.oldOwner
-    action.newOwner = event.params.newOwner
-    action.block = event.block.number
-    action.transactionHash = event.transaction.hash
-    action.timestamp = event.block.timestamp
-    action.save()
-
-    vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
-    vault.transferVaultOwnershipCount = vault.transferVaultOwnershipCount.plus(BIGINT_ONE)
-    vault.save()
-  } else {
-    log.warning('handleTransferVaultOwnership: No Vault with id {} found.', [vaultId])
   }
 }

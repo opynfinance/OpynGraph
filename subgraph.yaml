@@ -8,9 +8,9 @@ dataSources:
     name: OptionsFactory
     network: rinkeby
     source:
-      address: '0x31C0C162EdCecFB25ea7270A23D1440215F32742'
+      address: '0x398bBD226001BD3a5d2277AC6e5aC28a8E2497B7'
       abi: OptionsFactory
-      startBlock: 5798193
+      startBlock: 5862986
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -38,9 +38,9 @@ dataSources:
     name: OptionsExchange
     network: rinkeby
     source:
-      address: '0xC2dDcd9b379282915851B4E1160d5B163284f89D'
+      address: '0x37bE73cBb15236Fb17438a144984770776Ecc5dD'
       abi: OptionsExchange
-      startBlock: 5798190
+      startBlock: 5862984
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -88,17 +88,17 @@ templates:
           handler: handleIssuedOTokens
         - event: Liquidate(uint256,address,address)
           handler: handleLiquidate
-        - event: Exercise(uint256,uint256,address)
+        - event: Exercise(uint256,uint256,address,address)
           handler: handleExercise
-        - event: ClaimedCollateral(uint256,uint256,address)
-          handler: handleClaimedCollateral
+        - event: RedeemVaultBalance(uint256,uint256,address)
+          handler: handleRedeemVaultBalance
         - event: BurnOTokens(address,uint256)
           handler: handleBurnOTokens
-        - event: TransferVaultOwnership(address,address)
-          handler: handleTransferVaultOwnership
         - event: RemoveCollateral(uint256,address)
           handler: handleRemoveCollateral
-        - event: UpdateParameters(uint256,uint256,uint256,uint256,uint256,address)
+        - event: RemoveUnderlying(uint256,address)
+          handler: handleRemoveUnderlying
+        - event: UpdateParameters(uint256,uint256,uint256,uint256,address)
           handler: handleUpdateParameters
         - event: TransferFee(address,uint256)
           handler: handleTransferFee

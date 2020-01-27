@@ -239,24 +239,6 @@
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "liquidationFee",
-    "outputs": [
-      {
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "name": "exponent",
-        "type": "int32"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "constant": false,
     "inputs": [
       {
@@ -635,6 +617,11 @@
         "indexed": false,
         "name": "exerciser",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "vaultExercisedFrom",
+        "type": "address"
       }
     ],
     "name": "Exercise",
@@ -645,12 +632,12 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "amtCollateralClaimed",
+        "name": "amtCollateralRedeemed",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "name": "amtUnderlyingClaimed",
+        "name": "amtUnderlyingRedeemed",
         "type": "uint256"
       },
       {
@@ -659,7 +646,7 @@
         "type": "address"
       }
     ],
-    "name": "ClaimedCollateral",
+    "name": "RedeemVaultBalance",
     "type": "event"
   },
   {
@@ -677,23 +664,6 @@
       }
     ],
     "name": "BurnOTokens",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "oldOwner",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "TransferVaultOwnership",
     "type": "event"
   },
   {
@@ -724,11 +694,6 @@
       {
         "indexed": false,
         "name": "liquidationFactor",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "liquidationFee",
         "type": "uint256"
       },
       {
@@ -765,6 +730,23 @@
       }
     ],
     "name": "TransferFee",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "amountUnderlying",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "vaultOwner",
+        "type": "address"
+      }
+    ],
+    "name": "RemoveUnderlying",
     "type": "event"
   },
   {
@@ -829,6 +811,20 @@
     "type": "event"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "getVaultOwners",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
@@ -837,10 +833,6 @@
       },
       {
         "name": "_liquidationFactor",
-        "type": "uint256"
-      },
-      {
-        "name": "_liquidationFee",
         "type": "uint256"
       },
       {
@@ -1000,12 +992,25 @@
       {
         "name": "oTokensToExercise",
         "type": "uint256"
+      },
+      {
+        "name": "vaultsToExerciseFrom",
+        "type": "address[]"
       }
     ],
     "name": "exercise",
     "outputs": [],
     "payable": true,
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "removeUnderlying",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1036,6 +1041,10 @@
     ],
     "name": "getVault",
     "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      },
       {
         "name": "",
         "type": "uint256"
@@ -1090,20 +1099,6 @@
     "constant": false,
     "inputs": [
       {
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferVaultOwnership",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
         "name": "amtToRemove",
         "type": "uint256"
       }
@@ -1117,7 +1112,7 @@
   {
     "constant": false,
     "inputs": [],
-    "name": "claimCollateral",
+    "name": "redeemVaultBalance",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",

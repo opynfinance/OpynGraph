@@ -200,12 +200,6 @@ type OptionsContract @entity {
   " Max amount that a Vault can be liquidated by - Exponent "
   liquidationFactorExp: BigInt!
 
-  " The fees paid to our protocol every time a liquidation happens - Value "
-  liquidationFeeValue: BigInt!
-
-  " The fees paid to our protocol every time a liquidation happens - Exponent "
-  liquidationFeeExp: BigInt!
-
   " The minimum ratio of a vault's collateral to insurance promised - Value "
   minCollateralizationRatioValue: BigInt!
 
@@ -255,9 +249,6 @@ type OptionsContract @entity {
 
   " Total number of vaultOpened actions "
   vaultOpenedCount: BigInt!
-
-  " Total number of exercise actions "
-  exerciseCount: BigInt!
 
   " Total number of transferFee actions "
   transferFeeCount: BigInt!
@@ -350,32 +341,6 @@ type VaultOpenedAction implements OptionsContractAction @entity {
   timestamp: BigInt!
 }
 
-type ExerciseAction implements OptionsContractAction @entity {
-  " Equals to: <EXERCISE>-<transactionHash>-<logIndex> "
-  id: ID!
-
-  " OptionsContract the action is related to"
-  optionsContract: OptionsContract
-
-  " Exerciser address "
-  exerciser: Bytes!
-
-  " Amount of underlying paid by the exerciser "
-  amtUnderlyingToPay: BigInt!
-
-  " Amount of collateral paid by to exerciser "
-  amtCollateralToPay: BigInt!
-
-  " Block number "
-  block: BigInt!
-
-  " Transaction hash (tx) "
-  transactionHash: Bytes!
-
-  " Action timestamp as seconds (time) "
-  timestamp: BigInt!
-}
-
 type TransferFeeAction implements OptionsContractAction @entity {
   " Equals to: <TRANSFER-FEE>-<transactionHash>-<logIndex> "
   id: ID!
@@ -435,9 +400,6 @@ type UpdateParametersAction implements OptionsContractAction @entity {
   " Max amount that a Vault can be liquidated by "
   liquidationFactor: BigInt!
 
-  " The fees paid to our protocol every time a liquidation happens "
-  liquidationFee: BigInt!
-
   " The fees paid to our protocol every time a execution "
   transactionFee: BigInt!
 
@@ -470,6 +432,9 @@ type Vault @entity {
   " Amount of oTokens issued "
   oTokensIssued: BigInt!
 
+  " Amount of underlying this vault has been paid "
+  underlying: BigInt!
+
   "  Collateral added by this vault "
   collateral: BigInt!
 
@@ -477,6 +442,9 @@ type Vault @entity {
 
   " Total number of actions (all types)"
   actionCount: BigInt!
+
+  " Total number of exercise actions "
+  exerciseCount: BigInt!
 
   " Total number of ethCollateralAddedAction actions "
   ethCollateralAddedCount: BigInt!
@@ -487,20 +455,20 @@ type Vault @entity {
   " Total number of removeCollateral actions "
   removeCollateralCount: BigInt!
 
+  " Total number of removeUnderlying actions "
+  removeUnderlyingCount: BigInt!
+
   " Total number of issuedOToken actions "
   issuedOTokenCount: BigInt!
 
   " Total number of liquidate actions "
   liquidateCount: BigInt!
 
-  " Total number of claimedCollateral actions "
-  claimedCollateralCount: BigInt!
+  " Total number of redeemVaultBalanceAction actions "
+  redeemVaultBalanceActionCount: BigInt!
 
   " Total number of burnOToken actions "
   burnOTokenCount: BigInt!
-
-  " Total number of transferVaultOwnership actions "
-  transferVaultOwnershipCount: BigInt!
 }
 
 #
@@ -520,6 +488,35 @@ interface VaultAction {
   transactionHash: Bytes!
 
   " Timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
+type ExerciseAction implements VaultAction @entity {
+  " Equals to: <EXERCISE>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Vault the action is related to"
+  vault: Vault
+
+  " Exerciser address "
+  exerciser: Bytes!
+
+  " Vault exercised from owner address "
+  vaultExercisedFrom: Bytes!
+
+  " Amount of underlying paid by the exerciser "
+  amtUnderlyingToPay: BigInt!
+
+  " Amount of collateral paid by to exerciser "
+  amtCollateralToPay: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
   timestamp: BigInt!
 }
 
@@ -592,6 +589,29 @@ type RemoveCollateralAction implements VaultAction @entity {
   timestamp: BigInt!
 }
 
+type RemoveUnderlyingAction implements VaultAction @entity {
+  " Equals to: <REMOVE-UNDERLYING>-<transactionHash>-<logIndex> "
+  id: ID!
+
+  " Vault the action is related to"
+  vault: Vault
+
+  " Amount of underlying removed "
+  amount: BigInt!
+
+  " Address of owner removing the underlying "
+  owner: Bytes!
+
+  " Block number "
+  block: BigInt!
+
+  " Transaction hash (tx) "
+  transactionHash: Bytes!
+
+  " Action timestamp as seconds (time) "
+  timestamp: BigInt!
+}
+
 type IssuedOTokenAction implements VaultAction @entity {
   " Equals to: <ISSUED-OTOKENS>-<transactionHash>-<logIndex> "
   id: ID!
@@ -638,21 +658,21 @@ type LiquidateAction implements VaultAction @entity {
   timestamp: BigInt!
 }
 
-type ClaimedCollateralAction implements VaultAction @entity {
-  " Equals to: <CLAIMED-COLLATERAL>-<transactionHash>-<logIndex> "
+type RedeemVaultBalanceAction implements VaultAction @entity {
+  " Equals to: <REDEEM-VAULT-BALANCE>-<transactionHash>-<logIndex> "
   id: ID!
 
   " Vault the action is related to"
   vault: Vault
 
-  " Amount of collateral claimed "
-  collateralClaimed: BigInt!
+  " Amount of collateral redeemed "
+  collateralRedeemed: BigInt!
 
-  " Amount of underlying claimed "
-  underlyingClaimed: BigInt!
+  " Amount of underlying redeemed "
+  underlyingRedeemed: BigInt!
 
   " Address who claims the vault  "
-  claimedBy: Bytes!
+  redeemedBy: Bytes!
 
   " Block number "
   block: BigInt!
@@ -673,29 +693,6 @@ type BurnOTokenAction implements VaultAction @entity {
 
   " Amount of oTokens burned "
   burned: BigInt!
-
-  " Block number "
-  block: BigInt!
-
-  " Transaction hash (tx) "
-  transactionHash: Bytes!
-
-  " Action timestamp as seconds (time) "
-  timestamp: BigInt!
-}
-
-type TransferVaultOwnershipAction implements VaultAction @entity {
-  " Equals to: <TRANSFER-VAULT-OWNERSHIP>-<transactionHash>-<logIndex> "
-  id: ID!
-
-  " Vault the action is related to"
-  vault: Vault
-
-  " Previous owner address "
-  oldOwner: Bytes!
-
-  " New owner number "
-  newOwner: Bytes!
 
   " Block number "
   block: BigInt!

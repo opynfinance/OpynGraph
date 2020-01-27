@@ -71,7 +71,6 @@ export function handleOptionsContractCreated(event: OptionsContractCreatedEvent)
   let liquidationIncentive = boundOptionsContract.liquidationIncentive()
   let transactionFee = boundOptionsContract.transactionFee()
   let liquidationFactor = boundOptionsContract.liquidationFactor()
-  let liquidationFee = boundOptionsContract.liquidationFee()
   let minCollateralizationRatio = boundOptionsContract.minCollateralizationRatio()
   let oTokenExchangeRate = boundOptionsContract.oTokenExchangeRate()
   let strikePrice = boundOptionsContract.strikePrice()
@@ -90,8 +89,6 @@ export function handleOptionsContractCreated(event: OptionsContractCreatedEvent)
   optionsContract.transactionFeeExp = BigInt.fromI32(transactionFee.value1)
   optionsContract.liquidationFactorValue = liquidationFactor.value0
   optionsContract.liquidationFactorExp = BigInt.fromI32(liquidationFactor.value1)
-  optionsContract.liquidationFeeValue = liquidationFee.value0
-  optionsContract.liquidationFeeExp = BigInt.fromI32(liquidationFee.value1)
   optionsContract.minCollateralizationRatioValue = minCollateralizationRatio.value0
   optionsContract.minCollateralizationRatioExp = BigInt.fromI32(
     minCollateralizationRatio.value1,
@@ -123,7 +120,6 @@ export function handleOptionsContractCreated(event: OptionsContractCreatedEvent)
 
   optionsContract.actionCount = BIGINT_ZERO
   optionsContract.vaultOpenedCount = BIGINT_ZERO
-  optionsContract.exerciseCount = BIGINT_ZERO
   optionsContract.transferFeeCount = BIGINT_ZERO
   optionsContract.optionsContractOwnershipTransferredCount = BIGINT_ZERO
   optionsContract.updateParametersCount = BIGINT_ZERO
