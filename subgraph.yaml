@@ -53,6 +53,8 @@ dataSources:
           file: ./abis/OptionsExchange.json
         - name: OptionsContract
           file: ./abis/OptionsContract.json
+        - name: cToken
+          file: ./abis/cToken.json
       eventHandlers:
         - event: SellOTokens(address,address,address,address,uint256)
           handler: handleSellOTokens

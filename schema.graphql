@@ -769,6 +769,9 @@ type BuyOTokensAction implements OptionsExchangeAction @entity {
   " The number of oTokens to buy "
   oTokensToBuy: BigInt!
 
+  " When the underlying being insured is a cToken this is its exchangeRate at the time of this purchase "
+  exchangeRateCurrent: BigInt
+
   " Block number "
   block: BigInt!
 
