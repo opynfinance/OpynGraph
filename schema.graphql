@@ -772,6 +772,15 @@ type BuyOTokensAction implements OptionsExchangeAction @entity {
   " When the underlying being insured is a cToken this is its exchangeRate at the time of this purchase "
   exchangeRateCurrent: BigInt
 
+  " Premium paid, in paymentTokenAddress token "
+  pramiumPaid: BigInt!
+
+  " Payment price in ETH at the time of this purchase "
+  paymentTokenPrice: BigInt!
+
+  " USDC price in ETH at the time of this purchase "
+  usdcPrice: BigInt!
+
   " Block number "
   block: BigInt!
 

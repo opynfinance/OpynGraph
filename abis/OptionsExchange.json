@@ -88,6 +88,11 @@
         "indexed": false,
         "name": "oTokensToBuy",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "premiumPaid",
+        "type": "uint256"
       }
     ],
     "name": "BuyOTokens",

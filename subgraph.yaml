@@ -8,9 +8,9 @@ dataSources:
     name: OptionsFactory
     network: rinkeby
     source:
-      address: '0x398bBD226001BD3a5d2277AC6e5aC28a8E2497B7'
+      address: '0x29642F9f4010F2C575B004A760675476b3B97504'
       abi: OptionsFactory
-      startBlock: 5862986
+      startBlock: 5889995
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -38,9 +38,9 @@ dataSources:
     name: OptionsExchange
     network: rinkeby
     source:
-      address: '0x37bE73cBb15236Fb17438a144984770776Ecc5dD'
+      address: '0x0C6D742B27461b95613aC86D60C0b29763959672'
       abi: OptionsExchange
-      startBlock: 5862984
+      startBlock: 5889993
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -55,10 +55,12 @@ dataSources:
           file: ./abis/OptionsContract.json
         - name: cToken
           file: ./abis/cToken.json
+        - name: Oracle
+          file: ./abis/Oracle.json
       eventHandlers:
         - event: SellOTokens(address,address,address,address,uint256)
           handler: handleSellOTokens
-        - event: BuyOTokens(address,address,address,address,uint256)
+        - event: BuyOTokens(address,address,address,address,uint256,uint256)
           handler: handleBuyOTokens
 templates:
   - name: OptionsContract

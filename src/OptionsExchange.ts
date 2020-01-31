@@ -1,4 +1,5 @@
 import { log, Address } from '@graphprotocol/graph-ts'
+import { ORACLE, USDC } from './constants'
 
 import {
   SellOTokens as SellOTokensEvent,
@@ -8,6 +9,7 @@ import {
 import { OptionsContract, SellOTokensAction, BuyOTokensAction } from '../generated/schema'
 
 import { cToken as cTokenContract } from '../generated/OptionsExchange/cToken'
+import { Oracle as OracleContract } from '../generated/OptionsExchange/Oracle'
 
 export function handleSellOTokens(event: SellOTokensEvent): void {
   let actionId =
@@ -25,6 +27,8 @@ export function handleSellOTokens(event: SellOTokensEvent): void {
 }
 
 export function handleBuyOTokens(event: BuyOTokensEvent): void {
+  log.error('handleBuyOTokens {}', [event.params.oTokenAddress.toHex()])
+
   let actionId =
     'BUY-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let action = new BuyOTokensAction(actionId)
@@ -36,6 +40,7 @@ export function handleBuyOTokens(event: BuyOTokensEvent): void {
   action.block = event.block.number
   action.transactionHash = event.transaction.hash
   action.timestamp = event.block.timestamp
+  action.pramiumPaid = event.params.premiumPaid
 
   // Try to sabe exchangeRateCurrent when the underlying is a cToken
   let optionsContractId = event.params.oTokenAddress.toHexString()
@@ -58,6 +63,13 @@ export function handleBuyOTokens(event: BuyOTokensEvent): void {
       optionsContractId,
     ])
   }
+
+  let oracle = OracleContract.bind(Address.fromString(ORACLE))
+  let paymentTokenPrice = oracle.getPrice(event.params.paymentTokenAddress)
+  let usdcPrice = oracle.getPrice(Address.fromString(USDC))
+
+  action.paymentTokenPrice = paymentTokenPrice
+  action.usdcPrice = usdcPrice
 
   action.save()
 }
