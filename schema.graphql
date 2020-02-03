@@ -299,6 +299,8 @@ type OptionsContract @entity {
   events: [TokenEvent!]! @derivedFrom(field: "token")
 
   holdersBalances: [AccountBalance!] @derivedFrom(field: "token")
+
+  buyActions: [BuyOTokensAction!] @derivedFrom(field: "token")
 }
 
 #
@@ -780,6 +782,9 @@ type BuyOTokensAction implements OptionsExchangeAction @entity {
 
   " USDC price in ETH at the time of this purchase "
   usdcPrice: BigInt!
+
+  " When the underlying being insured is a cToken this is its Underlying price in ETH at the time of this purchase "
+  cTokenUnderlyingPrice: BigInt
 
   " Block number "
   block: BigInt!

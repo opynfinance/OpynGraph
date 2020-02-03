@@ -46,6 +46,8 @@ export function handleBuyOTokens(event: BuyOTokensEvent): void {
   let optionsContractId = event.params.oTokenAddress.toHexString()
   let optionsContract = OptionsContract.load(optionsContractId)
 
+  let oracle = OracleContract.bind(Address.fromString(ORACLE))
+
   if (optionsContract !== null) {
     let cToken = cTokenContract.bind(
       Address.fromString(optionsContract.underlying.toHexString()),
@@ -53,6 +55,9 @@ export function handleBuyOTokens(event: BuyOTokensEvent): void {
     let result = cToken.try_exchangeRateStored()
     if (!result.reverted) {
       action.exchangeRateCurrent = result.value
+      let cTokenUnderlying = cToken.underlying()
+      let underlyingPrice = oracle.getPrice(cTokenUnderlying)
+      action.cTokenUnderlyingPrice = underlyingPrice
     } else {
       log.warning('handleBuyOTokens: Underlying {} is not cToken.', [
         optionsContract.underlying.toHexString(),
@@ -64,7 +69,6 @@ export function handleBuyOTokens(event: BuyOTokensEvent): void {
     ])
   }
 
-  let oracle = OracleContract.bind(Address.fromString(ORACLE))
   let paymentTokenPrice = oracle.getPrice(event.params.paymentTokenAddress)
   let usdcPrice = oracle.getPrice(Address.fromString(USDC))
 
