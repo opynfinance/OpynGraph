@@ -40,7 +40,7 @@ export function handleBuyOTokens(event: BuyOTokensEvent): void {
   action.block = event.block.number
   action.transactionHash = event.transaction.hash
   action.timestamp = event.block.timestamp
-  action.pramiumPaid = event.params.premiumPaid
+  action.premiumPaid = event.params.premiumPaid
 
   // Try to sabe exchangeRateCurrent when the underlying is a cToken
   let optionsContractId = event.params.oTokenAddress.toHexString()

@@ -775,7 +775,7 @@ type BuyOTokensAction implements OptionsExchangeAction @entity {
   exchangeRateCurrent: BigInt
 
   " Premium paid, in paymentTokenAddress token "
-  pramiumPaid: BigInt!
+  premiumPaid: BigInt!
 
   " Payment price in ETH at the time of this purchase "
   paymentTokenPrice: BigInt!
