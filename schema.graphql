@@ -765,6 +765,9 @@ type BuyOTokensAction implements OptionsExchangeAction @entity {
   " oToken to buy "
   token: OptionsContract!
 
+  " oToken underlying address "
+  tokenUnderlyingAddress: Bytes!
+
   " The address of the token to pay the premiums in "
   paymentTokenAddress: Bytes!
 
