@@ -2,6 +2,7 @@ import { Address, log } from '@graphprotocol/graph-ts'
 
 import { DAI, USDC, OPTIONS_EXCHANGE } from './constants'
 import { Approval as ApprovalEvent } from '../generated/templates/ApprovalToken/ApprovalToken'
+import { Approval as DaiApprovalEvent } from '../generated/Dai/Dai'
 import { Approval } from '../generated/schema'
 
 export function handleApproval(event: ApprovalEvent): void {
@@ -25,6 +26,32 @@ export function handleApproval(event: ApprovalEvent): void {
     approval.save()
   } else {
     log.warning('handleApproval: No allowed token {}.', [event.address.toHexString()])
+  }
+}
+
+export function handleDaiApproval(event: DaiApprovalEvent): void {
+  log.error('handleDaiApproval {}.', [event.params.guy.toHex()])
+
+  if (event.params.guy.toHex() != OPTIONS_EXCHANGE) {
+    return
+  }
+
+  let symbol = getTokenSymbol(event.address)
+
+  if (symbol != '-') {
+    let approval = new Approval(
+      symbol + '-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
+    )
+    approval.approvedToken = symbol
+    approval.approvedTokenAddress = event.address
+    approval.owner = event.params.src
+    approval.value = event.params.wad
+    approval.block = event.block.number
+    approval.transactionHash = event.transaction.hash
+    approval.timestamp = event.block.timestamp
+    approval.save()
+  } else {
+    log.warning('handleDaiApproval: No allowed token {}.', [event.address.toHexString()])
   }
 }
 

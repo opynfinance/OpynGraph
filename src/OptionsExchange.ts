@@ -27,8 +27,6 @@ export function handleSellOTokens(event: SellOTokensEvent): void {
 }
 
 export function handleBuyOTokens(event: BuyOTokensEvent): void {
-  log.error('handleBuyOTokens {}', [event.params.oTokenAddress.toHex()])
-
   let actionId =
     'BUY-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let action = new BuyOTokensAction(actionId)

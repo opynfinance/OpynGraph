@@ -26,4 +26,4 @@ export { handleSellOTokens, handleBuyOTokens } from './OptionsExchange'
 
 export { handleERC20Transfer } from './ERC20'
 
-export { handleApproval } from './Approval'
+export { handleApproval, handleDaiApproval } from './Approval'
