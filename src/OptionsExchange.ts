@@ -16,6 +16,7 @@ export function handleSellOTokens(event: SellOTokensEvent): void {
     'SELL-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let action = new SellOTokensAction(actionId)
   action.seller = event.params.seller
+  action.transactionFrom = event.transaction.from
   action.receiver = event.params.receiver
   action.token = event.params.oTokenAddress.toHexString()
   action.payoutTokenAddress = event.params.payoutTokenAddress
