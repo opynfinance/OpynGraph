@@ -730,6 +730,9 @@ type SellOTokensAction implements OptionsExchangeAction @entity {
   " Seller address "
   seller: Bytes!
 
+  " Seller address, for when the sell is through the oToken wrapper functions "
+  transactionFrom: Bytes!
+
   " The address to send the payout tokens back to "
   receiver: Bytes!
 
