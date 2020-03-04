@@ -47,7 +47,7 @@ export function handleBuyOTokens(event: BuyOTokensEvent): void {
 
   let oracle = OracleContract.bind(Address.fromString(ORACLE))
 
-  if (optionsContract !== null) {
+  if (optionsContract != null) {
     action.tokenUnderlyingAddress = optionsContract.underlying
 
     let cToken = cTokenContract.bind(

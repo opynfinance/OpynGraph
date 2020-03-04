@@ -173,7 +173,7 @@ export function handleAssetChanged(event: AssetChangedEvent): void {
 
   let asset = SupportedAsset.load(event.params.asset.toHexString())
 
-  if (asset !== null) {
+  if (asset != null) {
     let oldAddress = asset.address
     asset.address = event.params.addr
     asset.save()
@@ -205,7 +205,7 @@ export function handleAssetDeleted(event: AssetDeletedEvent): void {
 
   let asset = SupportedAsset.load(event.params.asset.toHexString())
 
-  if (asset !== null) {
+  if (asset != null) {
     store.remove('SupportedAsset', event.params.asset.toHexString())
 
     let actionId =
