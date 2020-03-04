@@ -30,8 +30,6 @@ export function handleApproval(event: ApprovalEvent): void {
 }
 
 export function handleDaiApproval(event: DaiApprovalEvent): void {
-  log.error('handleDaiApproval {}.', [event.params.guy.toHex()])
-
   if (event.params.guy.toHex() != OPTIONS_EXCHANGE) {
     return
   }
