@@ -12,7 +12,7 @@ export function handleApproval(event: ApprovalEvent): void {
 
   let symbol = getTokenSymbol(event.address)
 
-  if (symbol != '-') {
+  if (symbol != null) {
     let approval = new Approval(
       symbol + '-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
     )
@@ -36,7 +36,7 @@ export function handleDaiApproval(event: DaiApprovalEvent): void {
 
   let symbol = getTokenSymbol(event.address)
 
-  if (symbol != '-') {
+  if (symbol != null) {
     let approval = new Approval(
       symbol + '-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString(),
     )
@@ -53,7 +53,7 @@ export function handleDaiApproval(event: DaiApprovalEvent): void {
   }
 }
 
-function getTokenSymbol(address: Address): string {
+function getTokenSymbol(address: Address): string | null {
   if (address.toHex() == DAI) {
     return 'DAI'
   }
@@ -62,5 +62,5 @@ function getTokenSymbol(address: Address): string {
     return 'USDC'
   }
 
-  return '-'
+  return null
 }
