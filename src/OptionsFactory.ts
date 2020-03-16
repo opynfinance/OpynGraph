@@ -1,7 +1,7 @@
 import { Address, BigInt, log, store } from '@graphprotocol/graph-ts'
 import { DAI, USDC } from './constants'
 import {
-  OptionsFactory as OptionsFactoryEvent,
+  OptionsFactory as OptionFactoryContract,
   OptionsContractCreated as OptionsContractCreatedEvent,
   AssetAdded as AssetAddedEvent,
   AssetChanged as AssetChangedEvent,
@@ -17,6 +17,7 @@ import {
 } from '../generated/templates'
 
 import {
+  OptionsFactoryCounter,
   OptionsFactory,
   SupportedAsset,
   AssetAddedAction,
@@ -27,19 +28,32 @@ import {
   OptionsContract,
 } from '../generated/schema'
 
-import { BIGINT_ZERO, BIGINT_ONE } from './helpers'
+import { BIGINT_ZERO, BIGINT_ONE, isBlackListed } from './helpers'
 
 const OPTION_CONTRACT_STATE_KEY = '0'
 
+function getFactoryCounter(): OptionsFactoryCounter {
+  let counter = OptionsFactoryCounter.load('0')
+  if (counter == null) {
+    counter = new OptionsFactoryCounter('0')
+    counter.optionsFactoryCount = BIGINT_ZERO
+    counter.save()
+  }
+
+  return counter as OptionsFactoryCounter
+}
+
 export function getOptionsFactory(address: Address): OptionsFactory {
-  let state = OptionsFactory.load(OPTION_CONTRACT_STATE_KEY)
+  let counter = getFactoryCounter()
+  let state = OptionsFactory.load(address.toHexString())
 
   if (state == null) {
-    state = new OptionsFactory(OPTION_CONTRACT_STATE_KEY)
-    let storage = OptionsContractSmartContract.bind(address)
+    state = new OptionsFactory(address.toHexString())
+    let boundOptionFactory = OptionFactoryContract.bind(address)
 
-    state.optionsExchangeAddress = storage.optionsExchange()
-    state.owner = storage.owner()
+    state.optionsExchangeAddress = boundOptionFactory.optionsExchange()
+    state.oracleAddress = boundOptionFactory.oracleAddress()
+    state.owner = boundOptionFactory.owner()
     state.actionCount = BIGINT_ZERO
     state.optionsContractCreatedCount = BIGINT_ZERO
     state.assetAddedCount = BIGINT_ZERO
@@ -49,11 +63,16 @@ export function getOptionsFactory(address: Address): OptionsFactory {
 
     state.save()
 
-    // Start traking the DAI approval
-    ApprovalTokenTemplate.create(Address.fromString(DAI))
+    if (counter.optionsFactoryCount.equals(BIGINT_ZERO)) {
+      // Start traking the DAI approval
+      ApprovalTokenTemplate.create(Address.fromString(DAI))
 
-    // Start traking the USDC approval
-    ApprovalTokenTemplate.create(Address.fromString(USDC))
+      // Start traking the USDC approval
+      ApprovalTokenTemplate.create(Address.fromString(USDC))
+    }
+
+    counter.optionsFactoryCount = counter.optionsFactoryCount.plus(BIGINT_ONE)
+    counter.save()
   }
 
   return state as OptionsFactory
@@ -62,12 +81,21 @@ export function getOptionsFactory(address: Address): OptionsFactory {
 export function handleOptionsContractCreated(event: OptionsContractCreatedEvent): void {
   let optionsAddress = event.params.addr
 
+  // Do not track some test oTokens
+  if (isBlackListed(optionsAddress)) {
+    return
+  }
+
   // Start traking the new OptionsContract
   OptionsContractTemplate.create(optionsAddress)
 
   // Bind OptionsContract for getting its data
   let boundOptionsContract = OptionsContractSmartContract.bind(optionsAddress)
+
+  let underlying = boundOptionsContract.underlying()
   let owner = boundOptionsContract.owner()
+  let optionsExchangeAddress = boundOptionsContract.optionsExchange()
+  let oracleAddress = boundOptionsContract.COMPOUND_ORACLE()
   let liquidationIncentive = boundOptionsContract.liquidationIncentive()
   let transactionFee = boundOptionsContract.transactionFee()
   let liquidationFactor = boundOptionsContract.liquidationFactor()
@@ -76,13 +104,14 @@ export function handleOptionsContractCreated(event: OptionsContractCreatedEvent)
   let strikePrice = boundOptionsContract.strikePrice()
   let expiry = boundOptionsContract.expiry()
   let collateral = boundOptionsContract.collateral()
-  let underlying = boundOptionsContract.underlying()
   let strike = boundOptionsContract.strike()
 
   // Create new entity
   let optionsContract = new OptionsContract(optionsAddress.toHexString())
   optionsContract.address = optionsAddress
   optionsContract.owner = owner
+  optionsContract.optionsExchangeAddress = optionsExchangeAddress
+  optionsContract.oracleAddress = oracleAddress
   optionsContract.liquidationIncentiveValue = liquidationIncentive.value0
   optionsContract.liquidationIncentiveExp = BigInt.fromI32(liquidationIncentive.value1)
   optionsContract.transactionFeeValue = transactionFee.value0
