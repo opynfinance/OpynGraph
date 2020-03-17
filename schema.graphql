@@ -978,6 +978,9 @@ type Approval @entity {
   " Approver address "
   owner: Bytes!
 
+  " Approves address "
+  spender: Bytes!
+
   " New allowance "
   value: BigInt!
 

@@ -22,6 +22,7 @@ export function handleApproval(event: ApprovalEvent): void {
     approval.approvedToken = symbol
     approval.approvedTokenAddress = event.address
     approval.owner = event.params.owner
+    approval.spender = event.params.spender
     approval.value = event.params.value
     approval.block = event.block.number
     approval.transactionHash = event.transaction.hash
@@ -49,6 +50,7 @@ export function handleDaiApproval(event: DaiApprovalEvent): void {
     approval.approvedToken = symbol
     approval.approvedTokenAddress = event.address
     approval.owner = event.params.src
+    approval.spender = event.params.guy
     approval.value = event.params.wad
     approval.block = event.block.number
     approval.transactionHash = event.transaction.hash
