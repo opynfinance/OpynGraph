@@ -1,7 +1,14 @@
+type OptionsFactoryCounter @entity {
+  id: ID!
+  optionsFactoryCount: BigInt!
+}
+
 type OptionsFactory @entity {
   id: ID!
 
   optionsExchangeAddress: Bytes!
+
+  oracleAddress: Bytes!
 
   owner: Bytes!
 
@@ -181,6 +188,10 @@ type OptionsContract @entity {
 
   " Contract owner address"
   owner: Bytes!
+
+  optionsExchangeAddress: Bytes!
+
+  oracleAddress: Bytes!
 
   " The incentive paid to liquidator - Value "
   liquidationIncentiveValue: BigInt!
@@ -745,6 +756,15 @@ type SellOTokensAction implements OptionsExchangeAction @entity {
   " The number of oTokens to sell "
   oTokensToSell: BigInt!
 
+  " Premium received, in payoutTokenAddress token "
+  payoutTokensReceived: BigInt
+
+  " Payout token price in ETH at the time of this purchase "
+  payoutTokenPrice: BigInt!
+
+  " USDC price in ETH at the time of this purchase "
+  usdcPrice: BigInt!
+
   " Block number "
   block: BigInt!
 
@@ -957,6 +977,9 @@ type Approval @entity {
 
   " Approver address "
   owner: Bytes!
+
+  " Approves address "
+  spender: Bytes!
 
   " New allowance "
   value: BigInt!

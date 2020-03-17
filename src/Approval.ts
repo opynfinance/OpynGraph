@@ -1,12 +1,15 @@
 import { Address, log } from '@graphprotocol/graph-ts'
 
-import { DAI, USDC, OPTIONS_EXCHANGE } from './constants'
+import { DAI, USDC, OPTIONS_EXCHANGE, OPTIONS_EXCHANGE_V2 } from './constants'
 import { Approval as ApprovalEvent } from '../generated/templates/ApprovalToken/ApprovalToken'
 import { Approval as DaiApprovalEvent } from '../generated/Dai/Dai'
 import { Approval } from '../generated/schema'
 
 export function handleApproval(event: ApprovalEvent): void {
-  if (event.params.spender.toHex() != OPTIONS_EXCHANGE) {
+  if (
+    event.params.spender.toHex() != OPTIONS_EXCHANGE &&
+    event.params.spender.toHex() != OPTIONS_EXCHANGE_V2
+  ) {
     return
   }
 
@@ -19,6 +22,7 @@ export function handleApproval(event: ApprovalEvent): void {
     approval.approvedToken = symbol
     approval.approvedTokenAddress = event.address
     approval.owner = event.params.owner
+    approval.spender = event.params.spender
     approval.value = event.params.value
     approval.block = event.block.number
     approval.transactionHash = event.transaction.hash
@@ -30,7 +34,10 @@ export function handleApproval(event: ApprovalEvent): void {
 }
 
 export function handleDaiApproval(event: DaiApprovalEvent): void {
-  if (event.params.guy.toHex() != OPTIONS_EXCHANGE) {
+  if (
+    event.params.guy.toHex() != OPTIONS_EXCHANGE &&
+    event.params.guy.toHex() != OPTIONS_EXCHANGE_V2
+  ) {
     return
   }
 
@@ -43,6 +50,7 @@ export function handleDaiApproval(event: DaiApprovalEvent): void {
     approval.approvedToken = symbol
     approval.approvedTokenAddress = event.address
     approval.owner = event.params.src
+    approval.spender = event.params.guy
     approval.value = event.params.wad
     approval.block = event.block.number
     approval.transactionHash = event.transaction.hash
