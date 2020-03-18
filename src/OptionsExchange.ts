@@ -13,50 +13,58 @@ import { OptionsContract, SellOTokensAction, BuyOTokensAction } from '../generat
 import { cToken as cTokenContract } from '../generated/OptionsExchange/cToken'
 import { Oracle as OracleContract } from '../generated/OptionsExchange/Oracle'
 
-function getSellOTokensAction(event: SellOTokensEvent): SellOTokensAction {
-  let actionId =
-    'SELL-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-  let action = new SellOTokensAction(actionId)
-  action.seller = event.params.seller
-  action.transactionFrom = event.transaction.from
-  action.receiver = event.params.receiver
-  action.token = event.params.oTokenAddress.toHexString()
-  action.payoutTokenAddress = event.params.payoutTokenAddress
-  action.oTokensToSell = event.params.oTokensToSell
-  action.block = event.block.number
-  action.transactionHash = event.transaction.hash
-  action.timestamp = event.block.timestamp
-
-  let oracle = OracleContract.bind(Address.fromString(ORACLE))
-  action.payoutTokenPrice = oracle.getPrice(event.params.payoutTokenAddress)
-  action.usdcPrice = oracle.getPrice(Address.fromString(USDC))
-
-  return action as SellOTokensAction
-}
-
 export function handleSellOTokens(event: SellOTokensEvent): void {
-  let optionsContractId = event.params.oTokenAddress.toHexString()
-  let optionsContract = OptionsContract.load(optionsContractId)
+  let optionsContract = OptionsContract.load(event.params.oTokenAddress.toHexString())
   if (optionsContract != null) {
-    let action = getSellOTokensAction(event)
+    let actionId =
+      'SELL-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let action = new SellOTokensAction(actionId)
+    action.seller = event.params.seller
+    action.transactionFrom = event.transaction.from
+    action.receiver = event.params.receiver
+    action.token = event.params.oTokenAddress.toHexString()
+    action.payoutTokenAddress = event.params.payoutTokenAddress
+    action.oTokensToSell = event.params.oTokensToSell
+    action.block = event.block.number
+    action.transactionHash = event.transaction.hash
+    action.timestamp = event.block.timestamp
+
+    let oracle = OracleContract.bind(Address.fromString(ORACLE))
+    action.payoutTokenPrice = oracle.getPrice(event.params.payoutTokenAddress)
+    action.usdcPrice = oracle.getPrice(Address.fromString(USDC))
+
     action.save()
   } else {
     log.warning('handleSellOTokens: No OptionsContract with id {} found.', [
-      optionsContractId,
+      event.params.oTokenAddress.toHexString(),
     ])
   }
 }
 
 export function handleSellOTokensV2(event: SellOTokensEventV2): void {
-  let optionsContractId = event.params.oTokenAddress.toHexString()
-  let optionsContract = OptionsContract.load(optionsContractId)
+  let optionsContract = OptionsContract.load(event.params.oTokenAddress.toHexString())
   if (optionsContract != null) {
-    let action = getSellOTokensAction(event)
+    let actionId =
+      'SELL-OTOKENS-V2' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let action = new SellOTokensAction(actionId)
+    action.seller = event.params.seller
+    action.transactionFrom = event.transaction.from
+    action.receiver = event.params.receiver
+    action.token = event.params.oTokenAddress.toHexString()
+    action.payoutTokenAddress = event.params.payoutTokenAddress
+    action.oTokensToSell = event.params.oTokensToSell
+    action.block = event.block.number
+    action.transactionHash = event.transaction.hash
+    action.timestamp = event.block.timestamp
+
+    let oracle = OracleContract.bind(Address.fromString(ORACLE))
+    action.payoutTokenPrice = oracle.getPrice(event.params.payoutTokenAddress)
+    action.usdcPrice = oracle.getPrice(Address.fromString(USDC))
     action.payoutTokensReceived = event.params.payoutTokensReceived
     action.save()
   } else {
     log.warning('handleSellOTokensV2: No OptionsContract with id {} found.', [
-      optionsContractId,
+      event.params.oTokenAddress.toHexString(),
     ])
   }
 }
