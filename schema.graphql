@@ -508,6 +508,12 @@ type ExerciseAction implements VaultAction @entity {
   " Equals to: <EXERCISE>-<transactionHash>-<logIndex> "
   id: ID!
 
+  " OptionsContract "
+  optionsContract: OptionsContract!
+
+  " The asset that is being protected the OptionContract "
+  underlying: Bytes!
+
   " Vault the action is related to"
   vault: Vault
 
@@ -517,11 +523,20 @@ type ExerciseAction implements VaultAction @entity {
   " Vault exercised from owner address "
   vaultExercisedFrom: Bytes!
 
+  " The number of oTokens being exercised "
+  oTokensToExercise: BigInt!
+
   " Amount of underlying paid by the exerciser "
   amtUnderlyingToPay: BigInt!
 
   " Amount of collateral paid by to exerciser "
   amtCollateralToPay: BigInt!
+
+  " Collateral token price in ETH at the time of this exercise "
+  collateralPrice: BigInt!
+
+  " USDC price in ETH at the time of this exercise "
+  usdcPrice: BigInt!
 
   " Block number "
   block: BigInt!
@@ -655,11 +670,20 @@ type LiquidateAction implements VaultAction @entity {
   " Vault the action is related to"
   vault: Vault
 
+  " The number of oTokens being taken out of circulation "
+  oTokensToLiquidate: BigInt!
+
   " Amount of collateral paid to liquidator "
   collateralToPay: BigInt!
 
   " Address who liquidates the vault  "
   liquidator: Bytes!
+
+  " Collateral token price in ETH at the time of this liquidation "
+  collateralPrice: BigInt!
+
+  " USDC price in ETH at the time of this liquidation "
+  usdcPrice: BigInt!
 
   " Block number "
   block: BigInt!

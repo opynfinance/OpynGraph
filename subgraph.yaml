@@ -159,6 +159,8 @@ templates:
       abis:
         - name: OptionsContract
           file: ./abis/OptionsContract.json
+        - name: Oracle
+          file: ./abis/Oracle.json
       eventHandlers:
         - event: VaultOpened(address)
           handler: handleVaultOpened
