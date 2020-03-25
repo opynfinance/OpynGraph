@@ -397,17 +397,15 @@ export function handleRemoveUnderlying(event: RemoveUnderlyingEvent): void {
   let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract != null) {
-    // add totalCollateral
     optionsContract.totalUnderlying = optionsContract.totalUnderlying.minus(
       event.params.amountUnderlying,
     )
     optionsContract.save()
 
-    // add collateral to vault
     let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
     let vault = Vault.load(vaultId)
     if (vault != null) {
-      vault.underlying = vault.collateral.minus(event.params.amountUnderlying)
+      vault.underlying = vault.underlying.minus(event.params.amountUnderlying)
       vault.save()
 
       let actionId =
@@ -415,7 +413,7 @@ export function handleRemoveUnderlying(event: RemoveUnderlyingEvent): void {
         event.transaction.hash.toHex() +
         '-' +
         event.logIndex.toString()
-      let action = new RemoveCollateralAction(actionId)
+      let action = new RemoveUnderlyingAction(actionId)
       action.vault = vaultId
       action.amount = event.params.amountUnderlying
       action.owner = event.params.vaultOwner
