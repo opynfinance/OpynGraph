@@ -22,8 +22,12 @@ export {
   handleTransferFee,
 } from './OptionsContract'
 
-export { handleSellOTokens, handleBuyOTokens } from './OptionsExchange'
+export {
+  handleSellOTokens,
+  handleBuyOTokens,
+  handleSellOTokensV2,
+} from './OptionsExchange'
 
 export { handleERC20Transfer } from './ERC20'
 
-export { handleApproval } from './Approval'
+export { handleApproval, handleDaiApproval } from './Approval'

@@ -1,4 +1,4 @@
-import { log, store } from '@graphprotocol/graph-ts'
+import { log, store, Address } from '@graphprotocol/graph-ts'
 
 import {
   OptionsContract as OptionsContractSmartContract,
@@ -16,6 +16,8 @@ import {
   UpdateParameters as UpdateParametersEvent,
   TransferFee as TransferFeeEvent,
 } from '../generated/templates/OptionsContract/OptionsContract'
+
+import { Oracle as OracleContract } from '../generated/templates/OptionsContract/Oracle'
 
 import {
   OptionsContract,
@@ -36,6 +38,7 @@ import {
 } from '../generated/schema'
 
 import { BIGINT_ZERO, BIGINT_ONE } from './helpers'
+import { ORACLE, USDC } from './constants'
 
 // Option related events
 
@@ -210,23 +213,39 @@ export function handleExercise(event: ExerciseEvent): void {
     let vaultId = optionsContractId + '-' + event.params.vaultExercisedFrom.toHexString()
     let vault = Vault.load(vaultId)
     if (vault != null) {
-      vault.collateral = vault.collateral.minus(event.params.amtCollateralToPay)
-      vault.underlying = vault.underlying.plus(event.params.amtUnderlyingToPay)
+      let boundOptionsContract = OptionsContractSmartContract.bind(event.address)
+      let vaultNew = boundOptionsContract.getVault(event.params.vaultExercisedFrom)
+
+      let oTokensToExercise = vault.oTokensIssued.minus(vaultNew.value1)
+
+      vault.collateral = vaultNew.value0
+      vault.oTokensIssued = vaultNew.value1
+      vault.underlying = vaultNew.value2
       vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
       vault.exerciseCount = vault.exerciseCount.plus(BIGINT_ONE)
       vault.save()
 
       let actionId =
         'EXERCISE-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-      let action = new ExerciseAction(vaultId)
-      action.vault = optionsContractId
+      let action = new ExerciseAction(actionId)
+      action.optionsContract = optionsContractId
+      action.underlying = optionsContract.underlying
+      action.vault = vaultId
       action.exerciser = event.params.exerciser
       action.vaultExercisedFrom = event.params.vaultExercisedFrom
+      action.oTokensToExercise = oTokensToExercise
       action.amtUnderlyingToPay = event.params.amtUnderlyingToPay
       action.amtCollateralToPay = event.params.amtCollateralToPay
       action.block = event.block.number
       action.transactionHash = event.transaction.hash
       action.timestamp = event.block.timestamp
+
+      let oracle = OracleContract.bind(Address.fromString(ORACLE))
+      action.collateralPrice = oracle.getPrice(
+        Address.fromString(optionsContract.collateral.toHexString()),
+      )
+      action.usdcPrice = oracle.getPrice(Address.fromString(USDC))
+
       action.save()
     } else {
       log.warning('handleExercise: No Vault with id {} found.', [vaultId])
@@ -287,6 +306,20 @@ export function handleERC20CollateralAdded(event: ERC20CollateralAddedEvent): vo
   let optionsContractId = event.address.toHexString()
   let optionsContract = OptionsContract.load(optionsContractId)
 
+  let actionId =
+    'ERC20-COLLATERAL-ADDED-' +
+    event.transaction.hash.toHex() +
+    '-' +
+    event.logIndex.toString()
+  let actionCheck = ERC20CollateralAddedAction.load(actionId)
+  if (actionCheck != null) {
+    log.error(
+      'handleERC20CollateralAdded: Trying to proccess same event tx {} block {}',
+      [event.transaction.hash.toString(), event.block.number.toString()],
+    )
+    return
+  }
+
   if (optionsContract != null) {
     // add totalCollateral
     optionsContract.totalCollateral = optionsContract.totalCollateral.plus(
@@ -301,11 +334,6 @@ export function handleERC20CollateralAdded(event: ERC20CollateralAddedEvent): vo
       vault.collateral = vault.collateral.plus(event.params.amount)
       vault.save()
 
-      let actionId =
-        'ERC20-COLLATERAL-ADDED-' +
-        event.transaction.hash.toHex() +
-        '-' +
-        event.logIndex.toString()
       let action = new ERC20CollateralAddedAction(actionId)
       action.vault = vaultId
       action.amount = event.params.amount
@@ -378,17 +406,15 @@ export function handleRemoveUnderlying(event: RemoveUnderlyingEvent): void {
   let optionsContract = OptionsContract.load(optionsContractId)
 
   if (optionsContract != null) {
-    // add totalCollateral
     optionsContract.totalUnderlying = optionsContract.totalUnderlying.minus(
       event.params.amountUnderlying,
     )
     optionsContract.save()
 
-    // add collateral to vault
     let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
     let vault = Vault.load(vaultId)
     if (vault != null) {
-      vault.underlying = vault.collateral.minus(event.params.amountUnderlying)
+      vault.underlying = vault.underlying.minus(event.params.amountUnderlying)
       vault.save()
 
       let actionId =
@@ -396,7 +422,7 @@ export function handleRemoveUnderlying(event: RemoveUnderlyingEvent): void {
         event.transaction.hash.toHex() +
         '-' +
         event.logIndex.toString()
-      let action = new RemoveCollateralAction(actionId)
+      let action = new RemoveUnderlyingAction(actionId)
       action.vault = vaultId
       action.amount = event.params.amountUnderlying
       action.owner = event.params.vaultOwner
@@ -421,6 +447,17 @@ export function handleRemoveUnderlying(event: RemoveUnderlyingEvent): void {
 export function handleIssuedOTokens(event: IssuedOTokensEvent): void {
   let optionsContractId = event.address.toHexString()
 
+  let actionId =
+    'ISSUED-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let actionCheck = IssuedOTokenAction.load(actionId)
+  if (actionCheck != null) {
+    log.error('handleIssuedOTokens: Trying to proccess same event tx {} block {}', [
+      event.transaction.hash.toString(),
+      event.block.number.toString(),
+    ])
+    return
+  }
+
   // add putsOutstanding to vault
   let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
   let vault = Vault.load(vaultId)
@@ -428,8 +465,6 @@ export function handleIssuedOTokens(event: IssuedOTokensEvent): void {
     vault.oTokensIssued = vault.oTokensIssued.plus(event.params.oTokensIssued)
     vault.save()
 
-    let actionId =
-      'ISSUED-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
     let action = new IssuedOTokenAction(actionId)
     action.vault = vaultId
     action.amount = event.params.oTokensIssued
@@ -493,26 +528,35 @@ export function handleLiquidate(event: LiquidateEvent): void {
     let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
     let vault = Vault.load(vaultId)
     if (vault != null) {
-      let optionsContract = OptionsContractSmartContract.bind(event.address)
-      let vaultNew = optionsContract.getVault(event.params.vaultOwner)
+      let boundOptionsContract = OptionsContractSmartContract.bind(event.address)
+      let vaultNew = boundOptionsContract.getVault(event.params.vaultOwner)
+
+      let oTokensToLiquidate = vault.oTokensIssued.minus(vaultNew.value1)
+
       vault.collateral = vaultNew.value0
       vault.oTokensIssued = vaultNew.value1
+      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
+      vault.liquidateCount = vault.liquidateCount.plus(BIGINT_ONE)
       vault.save()
 
       let actionId =
         'LIQUIDATE-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
       let action = new LiquidateAction(actionId)
       action.vault = vaultId
+      action.oTokensToLiquidate = oTokensToLiquidate
       action.collateralToPay = event.params.amtCollateralToPay
       action.liquidator = event.params.liquidator
       action.block = event.block.number
       action.transactionHash = event.transaction.hash
       action.timestamp = event.block.timestamp
-      action.save()
 
-      vault.actionCount = vault.actionCount.plus(BIGINT_ONE)
-      vault.liquidateCount = vault.liquidateCount.plus(BIGINT_ONE)
-      vault.save()
+      let oracle = OracleContract.bind(Address.fromString(ORACLE))
+      action.collateralPrice = oracle.getPrice(
+        Address.fromString(optionsContract.collateral.toHexString()),
+      )
+      action.usdcPrice = oracle.getPrice(Address.fromString(USDC))
+
+      action.save()
     } else {
       log.warning('handleLiquidate: No Vault with id {} found.', [vaultId])
     }

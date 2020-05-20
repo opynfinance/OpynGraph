@@ -6,11 +6,41 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: OptionsFactory
-    network: rinkeby
+    network: mainnet
     source:
-      address: '0x29642F9f4010F2C575B004A760675476b3B97504'
+      address: '0xb529964F86fbf99a6aA67f72a27e59fA3fa4FEaC'
       abi: OptionsFactory
-      startBlock: 5889995
+      startBlock: 9457113
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - OptionsFactory
+      abis:
+        - name: OptionsFactory
+          file: ./abis/OptionsFactory.json
+        - name: OptionsContract
+          file: ./abis/OptionsContract.json
+      eventHandlers:
+        - event: OptionsContractCreated(address)
+          handler: handleOptionsContractCreated
+        - event: AssetAdded(indexed string,indexed address)
+          handler: handleAssetAdded
+        - event: AssetChanged(indexed string,indexed address)
+          handler: handleAssetChanged
+        - event: AssetDeleted(indexed string)
+          handler: handleAssetDeleted
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+  - kind: ethereum/contract
+    name: OptionsFactory2
+    network: mainnet
+    source:
+      address: '0xcC5d905b9c2c8C9329Eb4e25dc086369D6C7777C'
+      abi: OptionsFactory
+      startBlock: 9680128
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -36,11 +66,11 @@ dataSources:
           handler: handleOwnershipTransferred
   - kind: ethereum/contract
     name: OptionsExchange
-    network: rinkeby
+    network: mainnet
     source:
-      address: '0x0C6D742B27461b95613aC86D60C0b29763959672'
+      address: '0x5778f2824a114F6115dc74d432685d3336216017'
       abi: OptionsExchange
-      startBlock: 5889993
+      startBlock: 9457110
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -62,10 +92,58 @@ dataSources:
           handler: handleSellOTokens
         - event: BuyOTokens(address,address,address,address,uint256,uint256)
           handler: handleBuyOTokens
+  - kind: ethereum/contract
+    name: OptionsExchangeV2
+    network: mainnet
+    source:
+      address: '0x39246c4F3F6592C974EBC44F80bA6dC69b817c71'
+      abi: OptionsExchangeV2
+      startBlock: 9680018
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - OptionsExchange
+      abis:
+        - name: OptionsExchangeV2
+          file: ./abis/OptionsExchangeV2.json
+        - name: OptionsContract
+          file: ./abis/OptionsContract.json
+        - name: cToken
+          file: ./abis/cToken.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: SellOTokens(address,address,address,address,uint256,uint256)
+          handler: handleSellOTokensV2
+        - event: BuyOTokens(address,address,address,address,uint256,uint256)
+          handler: handleBuyOTokens
+  - kind: ethereum/contract
+    name: Dai
+    network: mainnet
+    source:
+      address: '0x6b175474e89094c44da98b954eedeac495271d0f'
+      abi: Dai
+      startBlock: 9457110
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - Approval
+      abis:
+        - name: Dai
+          file: ./abis/Dai.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleDaiApproval
 templates:
   - name: OptionsContract
     kind: ethereum/contract
-    network: rinkeby
+    network: mainnet
     source:
       abi: OptionsContract
     mapping:
@@ -81,6 +159,8 @@ templates:
       abis:
         - name: OptionsContract
           file: ./abis/OptionsContract.json
+        - name: Oracle
+          file: ./abis/Oracle.json
       eventHandlers:
         - event: VaultOpened(address)
           handler: handleVaultOpened
@@ -112,7 +192,7 @@ templates:
           handler: handleERC20Transfer
   - name: ApprovalToken
     kind: ethereum/contract
-    network: rinkeby
+    network: mainnet
     source:
       abi: ApprovalToken
     mapping:
