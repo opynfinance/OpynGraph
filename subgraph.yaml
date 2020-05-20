@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: OptionsFactory
-    network: kovan
+    network: mainnet
     source:
-      address: '0x7f65609c3d8FB863FfbfDC940D03FB72FCfc15D1'
+      address: '0xb529964F86fbf99a6aA67f72a27e59fA3fa4FEaC'
       abi: OptionsFactory
-      startBlock: 15405380
+      startBlock: 9457113
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -34,10 +34,116 @@ dataSources:
           handler: handleAssetDeleted
         - event: OwnershipTransferred(indexed address,indexed address)
           handler: handleOwnershipTransferred
+  - kind: ethereum/contract
+    name: OptionsFactory2
+    network: mainnet
+    source:
+      address: '0xcC5d905b9c2c8C9329Eb4e25dc086369D6C7777C'
+      abi: OptionsFactory
+      startBlock: 9680128
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - OptionsFactory
+      abis:
+        - name: OptionsFactory
+          file: ./abis/OptionsFactory.json
+        - name: OptionsContract
+          file: ./abis/OptionsContract.json
+      eventHandlers:
+        - event: OptionsContractCreated(address)
+          handler: handleOptionsContractCreated
+        - event: AssetAdded(indexed string,indexed address)
+          handler: handleAssetAdded
+        - event: AssetChanged(indexed string,indexed address)
+          handler: handleAssetChanged
+        - event: AssetDeleted(indexed string)
+          handler: handleAssetDeleted
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+  - kind: ethereum/contract
+    name: OptionsExchange
+    network: mainnet
+    source:
+      address: '0x5778f2824a114F6115dc74d432685d3336216017'
+      abi: OptionsExchange
+      startBlock: 9457110
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - OptionsExchange
+      abis:
+        - name: OptionsExchange
+          file: ./abis/OptionsExchange.json
+        - name: OptionsContract
+          file: ./abis/OptionsContract.json
+        - name: cToken
+          file: ./abis/cToken.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: SellOTokens(address,address,address,address,uint256)
+          handler: handleSellOTokens
+        - event: BuyOTokens(address,address,address,address,uint256,uint256)
+          handler: handleBuyOTokens
+  - kind: ethereum/contract
+    name: OptionsExchangeV2
+    network: mainnet
+    source:
+      address: '0x39246c4F3F6592C974EBC44F80bA6dC69b817c71'
+      abi: OptionsExchangeV2
+      startBlock: 9680018
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - OptionsExchange
+      abis:
+        - name: OptionsExchangeV2
+          file: ./abis/OptionsExchangeV2.json
+        - name: OptionsContract
+          file: ./abis/OptionsContract.json
+        - name: cToken
+          file: ./abis/cToken.json
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: SellOTokens(address,address,address,address,uint256,uint256)
+          handler: handleSellOTokensV2
+        - event: BuyOTokens(address,address,address,address,uint256,uint256)
+          handler: handleBuyOTokens
+  - kind: ethereum/contract
+    name: Dai
+    network: mainnet
+    source:
+      address: '0x6b175474e89094c44da98b954eedeac495271d0f'
+      abi: Dai
+      startBlock: 9457110
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - Approval
+      abis:
+        - name: Dai
+          file: ./abis/Dai.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleDaiApproval
 templates:
   - name: OptionsContract
     kind: ethereum/contract
-    network: kovan
+    network: mainnet
     source:
       abi: OptionsContract
     mapping:
@@ -47,32 +153,58 @@ templates:
       file: ./src/index.ts
       entities:
         - OptionsContract
-        - RepoOpened
+        - VaultOpened
         - Exercise
-        - Repo
+        - Vault
       abis:
         - name: OptionsContract
           file: ./abis/OptionsContract.json
+        - name: Oracle
+          file: ./abis/Oracle.json
       eventHandlers:
-        - event: RepoOpened(uint256,address)
-          handler: handleRepoOpened
-        - event: ETHCollateralAdded(uint256,uint256,address)
+        - event: VaultOpened(address)
+          handler: handleVaultOpened
+        - event: ETHCollateralAdded(address,uint256,address)
           handler: handleETHCollateralAdded
-        - event: ERC20CollateralAdded(uint256,uint256,address)
+        - event: ERC20CollateralAdded(address,uint256,address)
           handler: handleERC20CollateralAdded
-        - event: IssuedOTokens(address,uint256,uint256)
+        - event: IssuedOTokens(address,uint256,address)
           handler: handleIssuedOTokens
-        - event: Liquidate(uint256,uint256,address)
+        - event: Liquidate(uint256,address,address)
           handler: handleLiquidate
-        - event: Exercise(uint256,uint256,address)
+        - event: Exercise(uint256,uint256,address,address)
           handler: handleExercise
-        - event: ClaimedCollateral(uint256,uint256,uint256,address)
-          handler: handleClaimedCollateral
-        - event: BurnOTokens(uint256,uint256)
+        - event: RedeemVaultBalance(uint256,uint256,address)
+          handler: handleRedeemVaultBalance
+        - event: BurnOTokens(address,uint256)
           handler: handleBurnOTokens
-        - event: TransferRepoOwnership(uint256,address,address)
-          handler: handleTransferRepoOwnership
-        - event: RemoveCollateral(uint256,uint256,address)
+        - event: RemoveCollateral(uint256,address)
           handler: handleRemoveCollateral
+        - event: RemoveUnderlying(uint256,address)
+          handler: handleRemoveUnderlying
+        - event: UpdateParameters(uint256,uint256,uint256,uint256,address)
+          handler: handleUpdateParameters
+        - event: TransferFee(address,uint256)
+          handler: handleTransferFee
         - event: OwnershipTransferred(indexed address,indexed address)
           handler: handleOptionsContractOwnershipTransferred
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleERC20Transfer
+  - name: ApprovalToken
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: ApprovalToken
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/index.ts
+      entities:
+        - Approval
+      abis:
+        - name: ApprovalToken
+          file: ./abis/Approval.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval

@@ -7,15 +7,27 @@ export {
 } from './OptionsFactory'
 
 export {
-  handleRepoOpened,
+  handleVaultOpened,
   handleETHCollateralAdded,
   handleERC20CollateralAdded,
   handleIssuedOTokens,
   handleLiquidate,
   handleExercise,
-  handleClaimedCollateral,
+  handleRedeemVaultBalance,
+  handleRemoveUnderlying,
   handleBurnOTokens,
-  handleTransferRepoOwnership,
   handleRemoveCollateral,
-  handleOptionsContractOwnershipTransferred
+  handleOptionsContractOwnershipTransferred,
+  handleUpdateParameters,
+  handleTransferFee,
 } from './OptionsContract'
+
+export {
+  handleSellOTokens,
+  handleBuyOTokens,
+  handleSellOTokensV2,
+} from './OptionsExchange'
+
+export { handleERC20Transfer } from './ERC20'
+
+export { handleApproval, handleDaiApproval } from './Approval'

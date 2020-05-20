@@ -71,6 +71,20 @@
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "oracleAddress",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "name": "",
@@ -106,6 +120,10 @@
     "inputs": [
       {
         "name": "_optionsExchangeAddr",
+        "type": "address"
+      },
+      {
+        "name": "_oracleAddress",
         "type": "address"
       }
     ],
@@ -202,6 +220,10 @@
       {
         "name": "_underlyingType",
         "type": "string"
+      },
+      {
+        "name": "_underlyingExp",
+        "type": "int32"
       },
       {
         "name": "_oTokenExchangeExp",
