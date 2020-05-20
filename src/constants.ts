@@ -10,6 +10,6 @@ export const ORACLE = '0x7054e08461e3ecb7718b63540addb3c3a1746415'
 let firstFactoryBlackList = new Array<string>()
 firstFactoryBlackList.push('0x53bc874dcec311c230e28038e1ac8a6c3a28de61') // second ocDAI
 firstFactoryBlackList.push('0x809ee624ad558cff769e6077088eb3dc2357aaea') // second oETH
-firstFactoryBlackList.push('0x1bc76312a8549204b23c19ad82bab8079c64c265') // firs oETH
+firstFactoryBlackList.push('0x1bc76312a8549204b23c19ad82bab8079c64c265') // first oETH
 
 export let FIRST_FACTORY_BLACK_LIST = firstFactoryBlackList

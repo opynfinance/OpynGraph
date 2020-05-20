@@ -306,6 +306,20 @@ export function handleERC20CollateralAdded(event: ERC20CollateralAddedEvent): vo
   let optionsContractId = event.address.toHexString()
   let optionsContract = OptionsContract.load(optionsContractId)
 
+  let actionId =
+    'ERC20-COLLATERAL-ADDED-' +
+    event.transaction.hash.toHex() +
+    '-' +
+    event.logIndex.toString()
+  let actionCheck = ERC20CollateralAddedAction.load(actionId)
+  if (actionCheck != null) {
+    log.error(
+      'handleERC20CollateralAdded: Trying to proccess same event tx {} block {}',
+      [event.transaction.hash.toString(), event.block.number.toString()],
+    )
+    return
+  }
+
   if (optionsContract != null) {
     // add totalCollateral
     optionsContract.totalCollateral = optionsContract.totalCollateral.plus(
@@ -320,11 +334,6 @@ export function handleERC20CollateralAdded(event: ERC20CollateralAddedEvent): vo
       vault.collateral = vault.collateral.plus(event.params.amount)
       vault.save()
 
-      let actionId =
-        'ERC20-COLLATERAL-ADDED-' +
-        event.transaction.hash.toHex() +
-        '-' +
-        event.logIndex.toString()
       let action = new ERC20CollateralAddedAction(actionId)
       action.vault = vaultId
       action.amount = event.params.amount
@@ -438,6 +447,17 @@ export function handleRemoveUnderlying(event: RemoveUnderlyingEvent): void {
 export function handleIssuedOTokens(event: IssuedOTokensEvent): void {
   let optionsContractId = event.address.toHexString()
 
+  let actionId =
+    'ISSUED-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let actionCheck = IssuedOTokenAction.load(actionId)
+  if (actionCheck != null) {
+    log.error('handleIssuedOTokens: Trying to proccess same event tx {} block {}', [
+      event.transaction.hash.toString(),
+      event.block.number.toString(),
+    ])
+    return
+  }
+
   // add putsOutstanding to vault
   let vaultId = optionsContractId + '-' + event.params.vaultOwner.toHexString()
   let vault = Vault.load(vaultId)
@@ -445,8 +465,6 @@ export function handleIssuedOTokens(event: IssuedOTokensEvent): void {
     vault.oTokensIssued = vault.oTokensIssued.plus(event.params.oTokensIssued)
     vault.save()
 
-    let actionId =
-      'ISSUED-OTOKENS-' + event.transaction.hash.toHex() + '-' + event.logIndex.toString()
     let action = new IssuedOTokenAction(actionId)
     action.vault = vaultId
     action.amount = event.params.oTokensIssued
