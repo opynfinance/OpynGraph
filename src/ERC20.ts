@@ -25,26 +25,19 @@ export function handleERC20Transfer(event: Transfer): void {
     let isTransfer = !isBurn && !isMint
 
     // Update token event logs
-    let eventEntityId: string
 
     if (isBurn) {
-      let eventEntity = handleBurnEvent(token, amount, event.params.from, event)
-
-      eventEntityId = eventEntity.id
+      handleBurnEvent(token, amount, event.params.from, event)
     } else if (isMint) {
-      let eventEntity = handleMintEvent(token, amount, event.params.to, event)
-
-      eventEntityId = eventEntity.id
+      handleMintEvent(token, amount, event.params.to, event)
     } else if (isTransfer) {
-      let eventEntity = handleTransferEvent(
+      handleTransferEvent(
         token,
         amount,
         event.params.from,
         event.params.to,
         event,
       )
-
-      eventEntityId = eventEntity.id
     }
 
     // Updates balances of accounts

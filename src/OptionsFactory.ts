@@ -8,15 +8,16 @@ import {
   AssetDeleted as AssetDeletedEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
 } from '../generated/OptionsFactory/OptionsFactory'
-
+import { ERC20 as ERC20Contract } from "../generated/OptionsFactory/ERC20"
 import { OptionsContract as OptionsContractSmartContract } from '../generated/OptionsFactory/OptionsContract'
-
+import { isZeroAddress } from './helpers'
 import {
   OptionsContract as OptionsContractTemplate,
   ApprovalToken as ApprovalTokenTemplate,
 } from '../generated/templates'
 
 import {
+  ERC20,
   OptionsFactoryCounter,
   OptionsFactory,
   SupportedAsset,
@@ -174,6 +175,22 @@ export function handleOptionsContractCreated(event: OptionsContractCreatedEvent)
 }
 
 export function handleAssetAdded(event: AssetAddedEvent): void {
+
+  // Create ERC20 instance
+  let tokenAddress = event.params.addr
+  let entity = new ERC20(tokenAddress.toHex())
+  if (isZeroAddress(tokenAddress)) { // it's ETH
+    entity.symbol = 'ETH'
+    entity.name = 'Ether'
+    entity.decimals = 18
+  } else {
+    let contract = ERC20Contract.bind(tokenAddress)
+    entity.symbol = contract.symbol()
+    entity.name = contract.name()
+    entity.decimals = contract.decimals()
+  }
+  entity.save();
+
   let optionFactory = getOptionsFactory(event.address)
 
   let asset = new SupportedAsset(event.params.asset.toHexString())
