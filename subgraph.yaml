@@ -55,6 +55,8 @@ dataSources:
           file: ./abis/OptionsFactory.json
         - name: OptionsContract
           file: ./abis/OptionsContract.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: OptionsContractCreated(address)
           handler: handleOptionsContractCreated

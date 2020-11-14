@@ -319,6 +319,12 @@ type OptionsContract @entity {
   holdersBalances: [AccountBalance!] @derivedFrom(field: "token")
 
   buyActions: [BuyOTokensAction!] @derivedFrom(field: "token")
+
+  collateralERC20: ERC20
+
+  underlyingERC20: ERC20
+
+  strikeERC20: ERC20
 }
 
 #

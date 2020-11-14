@@ -154,6 +154,10 @@ export function handleOptionsContractCreated(event: OptionsContractCreatedEvent)
   optionsContract.optionsContractOwnershipTransferredCount = BIGINT_ZERO
   optionsContract.updateParametersCount = BIGINT_ZERO
 
+  optionsContract.strikeERC20 = isZeroAddress(strike) ? null : strike.toHex()
+  optionsContract.collateralERC20 = isZeroAddress(collateral) ? null : collateral.toHex()
+  optionsContract.underlyingERC20 = isZeroAddress(underlying) ? null : underlying.toHex()
+
   optionsContract.save()
 
   let actionId =
